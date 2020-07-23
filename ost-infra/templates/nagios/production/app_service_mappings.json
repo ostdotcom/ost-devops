@@ -33,6 +33,6 @@
     "app" : ["check401","check429","check5xx","checkOpenFiles","checkSwap","checkLoad"]
   },
   "value":{
-    "app":["checkGethSwap","4vCPUCheckLoad"]
+    "app":["checkGethSwap"]
   }
 }

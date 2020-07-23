@@ -19,16 +19,7 @@
       "nrpe": "-r -w $ARG1$ -c $ARG2$"
     }
   },
-  "4vCPUCheckLoad": {
-    "serviceName": "4vCPUCheckLoad",
-    "serviceDesc": "Check Load per cpu  ",
-    "commandName": "check_load",
-    "args": {
-      "service": "!3.6,2.8,2.0!4.0,3.2,2.4",
-      "command": "$ARG1$ $ARG2$ ",
-      "nrpe": " -w $ARG1$ -c $ARG2$"
-    }
-  },
+
   "checkMntDisk": {
     "serviceName": "checkMntDisk",
     "serviceDesc": "Check %use of /mnt",

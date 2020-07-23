@@ -127,7 +127,7 @@ const servicePrototype = {
     for(let i=0;i<argsArr.length;i++){
       let ele = argsArr[i];
       let eleArr = ele.split('=').map(str => str.trim().replace(/["']/g, ""));
-      if(eleArr[1]='$'){
+      if(eleArr[1] === '$'){
         eleArr[1]='';
       }
       args[eleArr[0]] = eleArr[1];

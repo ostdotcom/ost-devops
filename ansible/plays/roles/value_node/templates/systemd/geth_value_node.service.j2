@@ -1,0 +1,24 @@
+[Unit]
+Description=geth_vn - Geth node for value chain
+After=remote-fs.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=deployer
+Type=simple
+Restart=always
+RestartSec=1
+{% if env == 'production' and sub_env == 'main' %}
+
+ExecStart=/bin/bash -l -c 'geth --syncmode fast --datadir {{ vc_node_dir }}/node_v --keystore {{ vc_node_dir }}/keystore  --port {{value_node_sync_port}} --rpc --rpcaddr $(hostname -i) --rpcapi eth,net,web3,personal,txpool --rpcport {{value_node_rpcport}} --rpcvhosts "*" --ws --wsapi eth,net,web3,personal,txpool --wsaddr $(hostname -i) --wsport {{value_node_wsport}} --wsorigins "*" --allow-insecure-unlock >> {{chain_logs_dir}}/node_v.log 2>&1'
+LimitNOFILE=50000
+{% else %}
+
+ExecStart=/bin/bash -l -c 'geth --syncmode fast --testnet --datadir {{ vc_node_dir }}/node_v --keystore {{ vc_node_dir }}/keystore  --port {{value_node_sync_port}} --rpc --rpcaddr $(hostname -I) --rpcapi eth,net,web3,personal,txpool --rpcport {{value_node_rpcport}} --rpcvhosts "*" --ws --wsapi eth,net,web3,personal,txpool --wsaddr $(hostname -i) --wsport {{value_node_wsport}} --wsorigins "*" --allow-insecure-unlock >> {{chain_logs_dir}}/node_v.log 2>&1'
+LimitNOFILE=50000
+{% endif %}
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target

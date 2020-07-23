@@ -1,0 +1,42 @@
+{
+  "es": {
+    "DomainName": "",
+    "AccessPolicies": "",
+    "EBSOptions": {
+      "EBSEnabled": true,
+      "Iops": 0,
+      "VolumeSize": 0,
+      "VolumeType": ""
+    },
+    "ElasticsearchClusterConfig": {
+      "DedicatedMasterCount": 0,
+      "DedicatedMasterEnabled": false,
+      "DedicatedMasterType": "",
+      "InstanceCount": 0,
+      "InstanceType": "",
+      "ZoneAwarenessEnabled": false
+    },
+    "ElasticsearchVersion": "6.2",
+    "VPCOptions": {
+      "SecurityGroupIds": ["sg-a7e4ffef"],
+      "SubnetIds": []
+    }
+
+  },
+
+  "accessPolicy": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": "*"
+        },
+        "Action": "es:*",
+        "Resource": ""
+      }
+    ]
+  }
+
+
+}

@@ -1,0 +1,61 @@
+---
+
+server_type: rails
+is_web: false
+gemset_wrappers: "{{deploy_home}}/.rvm/gems/ruby-2.5.3@kit_api_gemset/wrappers"
+
+flush_memcache: True
+flush_redis: True
+
+# Nginx-passenger configuration paramaters
+nginx:
+  worker_processes: 4
+  passenger_max_pool_size: 4
+  passenger_min_instances: 2
+  listen_port: 8082
+  logs_dir: "{{ logs_dir }}/nginx"
+  pid_dir: "{{pid_dir}}"
+  rate_limit:
+    burst_size: 50
+    delay: 30
+    zone_size: 30m
+    rate: "300r/s"
+    limit_key: "$remote_addr"
+  realip_from:
+    - 10.49.0.0/20
+    - 10.49.64.0/20
+    - 10.50.0.0/20
+    - 10.50.64.0/20
+
+# Redis configuration parameters
+redis_server_required: false
+redis:
+  port: 9000
+  pid_dir: "{{pid_dir}}"
+  logs_dir: "{{ logs_dir }}/redis"
+  data_dir: "/mnt/redis"
+  conf_dir: /usr/local/redis
+  server_exec: /usr/local/bin/redis-server
+  client_exec: /usr/local/bin/redis-cli
+
+# God configuration to monitor Sidekiq
+god:
+  bin: "/usr/local/rvm/gems/ruby-2.5.3/bin/god"
+  port: 17121
+  log_dir: "{{ logs_dir }}/god"
+  pid_dir: "{{pid_dir}}"
+  conf_dir: /usr/local/god
+  num_workers: 1
+
+
+
+#cron_job_list:
+#  process_email_service_api_call_hooks:
+#    name: process_email_service_api_call_hooks
+#    service_name: process_email_service_api_call_hooks
+#    exec_path: "rake"
+#    exec_file_path: ""
+#    instance_count: 0
+#    extra_vars: "RAILS_ENV={{env}} cron_task:continuous:process_email_service_api_call_hooks lock_key_suffix=1"
+#    id_prefix: ""
+#    timer: "*:0/1"

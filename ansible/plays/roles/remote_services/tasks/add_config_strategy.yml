@@ -1,0 +1,30 @@
+---
+- set_fact:
+    dest_config_file: "{{exec_path}}/configStrategy.json"
+    flushOptions: "--flush-memcache"
+
+- name: Copy config strategy file
+  copy:
+    src: "{{configStrategy_file}}.json"
+    dest: "{{dest_config_file}}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0755
+
+- name: "Run command for adding config strategy"
+  shell: |
+        /bin/bash -lc ' cd {{exec_path }};/bin/node  devops/exec/configStrategy.js  --add-configs  --config-file-path {{dest_config_file}} {{kindOptions}}'
+  register: out
+- debug: var=out.stdout_lines
+
+- name: "Run command for activation"
+  shell: |
+    /bin/bash -lc ' cd {{exec_path }};/bin/node  devops/exec/configStrategy.js  --activate-configs   {{kindOptions}}'
+  register: out
+  when: activate is defined and activate|length >0
+- debug: var=out.stdout_lines
+
+- name: Remove data input file
+  file:
+    state: absent
+    path: "{{dest_config_file}}"

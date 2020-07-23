@@ -1,0 +1,40 @@
+# SSH configuration to connect to remote servers via Jump box / Bastion host
+
+Host *
+  ServerAliveInterval 30
+  ServerAliveCountMax 120
+  StrictHostKeyChecking no
+
+#~~~~~~~~~~~~~~~~~ OST PLATFORM ~~~~~~~~~~~~~~~~~~~#
+
+# Testnet servers
+Host < Jumpbox Host/IP >
+  IdentityFile < YOUR KEY FILE >
+  User <User User Name>
+  ForwardAgent yes
+  ControlPath ~/.ssh/cm-%r@%h:%p
+  ControlMaster auto
+  ControlPersist 10m
+
+Host 10.49.*
+  User centos
+  IdentityFile < INTERNAL KEY FILE >
+  ProxyCommand ssh <User User Name>@<Jumpbox Host/IP> -W %h:%p
+
+
+# Mainnet servers
+Host <Jumpbox Host/IP>
+  IdentityFile < YOUR KEY FILE >
+  User <User User Name>
+  ForwardAgent yes
+  ControlPath ~/.ssh/cm-%r@%h:%p
+  ControlMaster auto
+  ControlPersist 10m
+
+Host 10.50.*
+  User centos
+  IdentityFile < INTERNAL KEY FILE >
+  ProxyCommand ssh <User User Name>@<Jumpbox Host/IP> -W %h:%p
+
+
+#~~~~~~~~~~~~~~~~~ OST PLATFORM ~~~~~~~~~~~~~~~~~~~#

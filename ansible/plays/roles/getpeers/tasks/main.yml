@@ -1,0 +1,13 @@
+---
+- name: Setup getpeer sync  script
+  template:
+    src: "{{peer_script_name}}.j2"
+    dest: "{{ workspace }}/{{peer_script_name}}"
+    group: "{{deploy_group}}"
+    mode: 0755
+    owner: "{{deploy_user}}"
+- cron:
+    name: "getpeers "
+    minute: "*/{{cron_minute}}"
+    hour: "*"
+    job: "su - deployer -lc \"{{ workspace }}/{{peer_script_name}} -c {{chainId}}\""

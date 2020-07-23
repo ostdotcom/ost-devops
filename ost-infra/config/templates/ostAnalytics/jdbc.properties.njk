@@ -1,0 +1,31 @@
+Hibernate/driver=org.hsqldb.jdbcDriver
+Hibernate/url=jdbc:hsqldb:hsql://localhost/hibernate
+Hibernate/user=hibuser
+Hibernate/password=password
+Shark/type=javax.sql.DataSource
+Shark/driver=org.hsqldb.jdbcDriver
+Shark/url=jdbc:hsqldb:hsql://localhost/shark
+Shark/user=sa
+Shark/password=
+
+
+#------Analytics Redshift Database---------------------
+analyticsRedshiftConnection{{platformSuffix}}/type=javax.sql.DataSource
+analyticsRedshiftConnection{{platformSuffix}}/driver=org.redshift.Driver
+analyticsRedshiftConnection{{platformSuffix}}/url=jdbc:redshift://{{redshiftHost}}:{{redshiftPort}}/{{redshiftDatabase}}
+analyticsRedshiftConnection{{platformSuffix}}/user={{redshiftUser}}
+analyticsRedshiftConnection{{platformSuffix}}/password={{redshiftPassword}}
+
+#------Analytics MYSQL Database---------------------
+analyticsMysqlConnection_{{subEnv}}{{platformSuffix}}/type=javax.sql.DataSource
+analyticsMysqlConnection_{{subEnv}}{{platformSuffix}}/driver=org.gjt.mm.mysql.Driver
+analyticsMysqlConnection_{{subEnv}}{{platformSuffix}}/url=jdbc:mysql://{{mysqlHost}}:{{mysqlPort}}/{{mysqlDatabase}}?rewriteBatchedStatements=true&useServerPrepStmts=false
+analyticsMysqlConnection_{{subEnv}}{{platformSuffix}}/user={{mysqlUser}}
+analyticsMysqlConnection_{{subEnv}}{{platformSuffix}}/password={{mysqlPassword}}
+
+#------Logs Database---------------------
+analyticsLogsConnection_{{subEnv}}{{platformSuffix}}/type=javax.sql.DataSource
+analyticsLogsConnection_{{subEnv}}{{platformSuffix}}/driver=org.gjt.mm.mysql.Driver
+analyticsLogsConnection_{{subEnv}}{{platformSuffix}}/url=jdbc:mysql://{{mysqlHost}}:{{mysqlPort}}/{{mysqlDatabase}}?rewriteBatchedStatements=true&useServerPrepStmts=false
+analyticsLogsConnection_{{subEnv}}{{platformSuffix}}/user={{mysqlUser}}
+analyticsLogsConnection_{{subEnv}}{{platformSuffix}}/password={{mysqlPassword}}

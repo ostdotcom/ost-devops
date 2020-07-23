@@ -1,0 +1,133 @@
+---
+- name: Get the name of file System
+  shell: df -h |grep mnt|awk  '{print $1}'
+  register: fileSystem
+
+- name: Create a ext4 filesystem on /dev/sdb1
+  shell: "resize2fs {{fileSystem.stdout}}"
+
+- name: Set authorized key for user
+  authorized_key:
+    user: "{{remoteUser}}"
+    state: present
+    exclusive: yes
+    key: "{{user_pub_key}}"
+  when: user_pub_key is defined and user_pub_key != ''
+
+- name: Some geeky stuff
+  lineinfile:
+    path: "/home/{{remoteUser}}/.bash_profile"
+    line: "alias dep='sudo su - deployer'"
+
+- name: Create root dir structure for apps and geth
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - {path: "{{app_base_directory}}", mode: "0755"}
+
+- name: Create workspace dir
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{item.mode}}"
+  with_items:
+    - {path: "{{ workspace }}/jobs", mode: "0755", owner: "{{ deploy_user }}", group: "{{ deploy_user }}"}
+    - {path: "{{ checkout_dir }}", mode: "0700", owner: "{{ deploy_user }}", group: "{{ deploy_user }}"}
+    - {path: "{{ pid_dir }}", mode: "0700", owner: "{{ deploy_user }}", group: "{{ deploy_user }}"}
+    - {path: "{{ logs_dir }}", mode: "0750", owner: "{{ deploy_user }}", group: "{{ deploy_group }}"}
+    - {path: "{{ custom_env_files_dir }}", mode: "0750", owner: "{{ deploy_user }}", group: "{{ deploy_group }}"}
+    - {path: "{{ data_dir }}", mode: "0750", owner: "{{ deploy_user }}", group: "{{ deploy_group }}"}
+    - {path: "{{ default_script_location }}", mode: "0750", owner: "{{remoteUser}}", group: "{{remoteUser}}"}
+    - {path: "{{ default_job_location }}" , mode: "0750", owner: "{{remoteUser}}", group: "{{remoteUser}}"}
+
+
+- name: Create chain dir
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ deploy_user }}"
+    group: "{{ item.group }}"
+    mode: "{{item.mode}}"
+  with_items:
+    - {path: "{{chain_dir}}" , mode: "0750", group: "{{ deploy_group }}"}
+  when: chain_dir is defined
+
+
+- name: remove  env config files
+  file:
+    path: "{{ custom_env_files_dir }}/{{ item }}"
+    state: absent
+  with_items:
+    - "{{ common_env_file }}"
+    - "{{ app_env_file }}"
+
+- name: Create env config files for app
+  file:
+    path: "{{ item.path }}"
+    state: touch
+    owner: "{{ deploy_user }}"
+    group: "{{ item.group }}"
+    mode: "{{item.mode}}"
+  with_items:
+    - {path: "{{ custom_env_files_dir }}/{{common_env_file}}", mode: "0750", group: "{{ deploy_group }}"}
+    - {path: "{{ custom_env_files_dir }}/{{app_env_file}}", mode: "0750", group: "{{ deploy_group }}"}
+
+- name: Symlink env config files
+  file:
+    src: "{{ custom_env_files_dir }}/{{ item }}"
+    dest: "{{ profile_vars_dir }}/{{ item }}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_group }}"
+    state: link
+    mode: 0750
+  with_items:
+    - "{{ common_env_file }}"
+    - "{{ app_env_file }}"
+
+
+- name: Touch a file, using
+  file:
+    path: "/etc/sudoers.d/{{ deploy_user }}"
+    state: touch
+    mode: 0440
+
+- name: Add sudo options for deployer user
+  blockinfile:
+    path: "/etc/sudoers.d/{{ deploy_user }}"
+    marker: "#{mark} {{application}} Ansible managed block"
+    block: |
+      {{ deploy_user }} ALL= NOPASSWD: /bin/systemctl start *{{ application }}*
+      {{ deploy_user }} ALL= NOPASSWD: /bin/systemctl stop *{{ application }}*
+      {{ deploy_user }} ALL= NOPASSWD: /bin/systemctl restart *{{ application }}*
+      {{ deploy_user }} ALL= NOPASSWD: /bin/systemctl reload *{{ application }}*
+      {{ deploy_user }} ALL= NOPASSWD: /bin/systemctl status *{{ application }}*
+      # Last line is required to be empty or comment, as its required for sudoers else sudo command will break
+
+
+- name: Setup nagios  server
+  include_role:
+    name: monitoring
+  vars:
+    monitoring_task: "nagios_server_setup"
+  when: nagios_server  is defined and nagios_server|bool
+
+- name: Setup nagios  client
+  include_role:
+    name: monitoring
+  vars:
+    monitoring_task: "nagios_client_setup"
+  when: (nagios_server  is not defined or not nagios_server|bool )and ansible_distribution == 'CentOS'
+
+- name: Include deployment script copy
+  include_role:
+    name: common
+    tasks_from: update_deploy_scripts

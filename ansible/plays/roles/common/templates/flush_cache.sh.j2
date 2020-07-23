@@ -1,0 +1,28 @@
+#!/bin/bash
+
+server_type=$1
+current_path=$2
+flushOptions=`sed -e 's/^"//' -e 's/"$//' <<<"$3"`
+status=0
+echo "server_type: ${server_type}"
+
+if [[ ${server_type} = "rails" ]]
+then
+    echo "Running rails runner "
+    /bin/bash -lc "cd $current_path;rails runner -e {{env}} 'status=Rails.cache.clear;puts status'"
+    status=$(( $status + $? ));
+    echo "finished with ${status}"
+
+elif [[ ${server_type} = "nodejs" ]]
+then
+    cd $current_path
+    echo "node devops/exec/flushMemcache.js ${flushOptions}"
+    node devops/exec/flushMemcache.js ${flushOptions}
+    status=$(( $status + $? ));
+fi
+
+if [[ $status -ne 0 ]]
+then
+    echo "Flush Cache failed ";
+    exit 1
+fi

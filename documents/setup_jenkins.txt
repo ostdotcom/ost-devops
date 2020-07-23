@@ -1,0 +1,244 @@
+
+1. Install java:
+----------------
+
+sudo yum install java -y
+
+sudo cp /etc/profile /etc/profile_backup
+echo 'export JAVA_HOME=/usr/lib/jvm/jre-1.8.0-openjdk' | sudo tee -a /etc/profile
+echo 'export JRE_HOME=/usr/lib/jvm/jre' | sudo tee -a /etc/profile
+source /etc/profile
+
+echo $JAVA_HOME
+echo $JRE_HOME
+
+
+2. Install jenkins:
+-------------------
+
+cd /opt
+sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+sudo yum install jenkins -y
+
+sudo systemctl start jenkins.service
+sudo systemctl enable jenkins.service
+
+3. Configure jenkins:
+---------------------
+
+mkdir /mnt/jenkins
+chown -R jenkins:jenkins /mnt/jenkins
+
+cp /var/lib/jenkins/config.xml /var/lib/jenkins/config_back.xml
+
+vim /var/lib/jenkins/config.xml
+[ Update <workspaceDir> initial path to /mnt/jenkins ]
+
+4. Install Git:
+---------------
+
+sudo yum install git
+
+
+5. Setup Jenkins:
+-----------------
+
+mkdir -p /mnt/jenkins/ansible_workspace
+mkdir -p /mnt/jenkins/devops
+
+chown -R deployer:deployer /mnt/jenkins/ansible_workspace
+chown -R deployer:deployer /mnt/jenkins/devops
+
+> Add jenkins user to wheel group
+
+usermod -a -G wheel kenkins
+
+> Uncomment wheel permission in sudoers file (visudo) for NOPASSWORD option
+
+sudo su - deployer
+
+> Generate ssh key (jenkins_deploy) to checkout code from git
+
+ssh-keygen -b 4096
+
+> Copy public key (jenkins_deploy.pub) to github user account
+
+> create config file inside .ssh folder and copy ssh config options along with keys to connect to different environments
+> Copy jenkin_keys and config_downloads inside ansible_workspace
+
+cd /mnt/jenkins/devops
+
+git clone git@github.com:OpenSTFoundation/SimpleTokenDevops.git
+
+> Create symlink for build_and_deploy.sh inside ansible_workspace
+
+echo 'export LOCAL_WORKSPACE="/mnt/jenkins/ansible_workspace"' >> ~/.bash_profile
+
+
+6. Setup nginx:
+---------------
+
+sudo mkdir -p /mnt/logs
+sudo chown -R deployer:deployer /mnt/logs
+
+sudo su - deployer
+
+> Generate htpasswd for user (ostJenkins)
+
+htpasswd -c ~/libs/nginx/conf/.htpasswd ostJenkins
+
+touch ~/libs/nginx/conf/nginx-jenkins.conf
+Copy below contents to ~/libs/nginx/conf/nginx-jenkins.conf
+
+>>>>>>>>>>
+
+user  deployer;
+worker_processes 4;
+
+error_log  /mnt/logs/error-jenkins.log;
+pid        /mnt/logs/nginx-jenkins.pid;
+
+events {
+    worker_connections  5000;
+    use epoll;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '"[$time_iso8601]": USER_IP="$remote_addr" - APP_IP="$upstream_addr" - RES_TIME="$upstream_response_time" - '
+    'STATUS="$status" - BODYSIZE="$body_bytes_sent" - REQUEST="$request" - REFERER="$http_referer" - '
+    'AGENT="$http_user_agent" SERVER="$server_name" - "$http_x_forwarded_for" - UPSTREAMSTATUS="$upstream_status" - PROXY="$proxy_add_x_forwarded_for"- HTTP_VIA="$http_via" REQUEST_TIME="$request_time" CONN_SERIAL_NUM="$connection" CONN_REQUESTS="$connection_requests" - X-Request-Id="$sent_http_x_request_id" - host=$host - ssl_protocol=$ssl_protocol - binary_remote_addr="$binary_remote_addr"';
+
+    access_log  /mnt/logs/access-jenkins.log  main;
+
+    sendfile        on;
+    ignore_invalid_headers      on;
+    keepalive_timeout  65;
+    gzip  on;
+    gzip_static       on;
+    gzip_http_version 1.1;
+    gzip_proxied      expired no-cache no-store private auth;
+
+    proxy_intercept_errors on;
+    server_names_hash_bucket_size 128;
+    client_max_body_size 32m;
+
+    server_tokens off;
+    more_clear_headers  'ETag' 'Server' 'X-Powered-By' 'X-Runtime';
+
+    # For External routing
+    server {
+        listen       8050;
+        server_name  junk.stagingost.com;
+
+        if ($http_user_agent ~* "ELB-HealthChecker/*") {
+            return 200;
+        }
+
+        set $https_rw_rule 0;
+        if ($http_x_forwarded_proto != "https") {
+            set $https_rw_rule 1;
+        }
+
+        if ($https_rw_rule = 1) {
+            return 404;
+        }
+
+        auth_basic "Restricted";
+        auth_basic_user_file /home/deployer/libs/nginx/conf/.htpasswd ;
+
+        location / {
+
+            proxy_pass http://127.0.0.1:8080;
+            proxy_http_version 1.1;
+
+            proxy_set_header        X-Real-IP $remote_addr;
+            proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header        X-Forwarded-Proto $scheme;
+            proxy_set_header        Authorization "";
+
+            proxy_read_timeout  90;
+
+            proxy_redirect      http://127.0.0.1:8080 https://junk.stagingost.com;
+        }
+
+    }
+
+}
+
+<<<<<<<<
+
+> Create systemd init file for nginx
+
+sudo touch /etc/systemd/system/nginx-jenkins.service
+Copy below contents to /etc/systemd/system/nginx-jenkins.service
+
+>>>>>>>>
+
+[Unit]
+Description=nginx-jenkins - Nginx reverse proxy for jenkins
+After=remote-fs.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=deployer
+Type=forking
+ExecStartPre=/home/deployer/libs/nginx/sbin/nginx -t -c /home/deployer/libs/nginx/conf/nginx-jenkins.conf
+ExecStart=/home/deployer/libs/nginx/sbin/nginx -c /home/deployer/libs/nginx/conf/nginx-jenkins.conf
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+
+<<<<<<<<
+
+> Start nginx-jenkins:
+
+sudo systemctl start nginx-jenkins
+sudo systemctl enable nginx-jenkins
+
+
+Basic Auth:
+ostJenkins
+A^#YJ+3cUY*2?Hn?vpzE
+
+
+#####################################################################################
+
+Upgrade Jenkins:
+----------------
+
+sudo su -l
+
+cd /opt
+wget http://updates.jenkins-ci.org/download/war/2.107.3/jenkins.war
+
+cp /usr/lib/jenkins/jenkins.war /usr/lib/jenkins/jenkins.war.back_11052018
+cp /opt/jenkins.war /usr/lib/jenkins/
+
+systemctl stop jenkins
+systemctl start jenkins
+
+
+
+
+For migration :
+
+1:]  Copy jobs directory | delete lastSuccessful and lastStable directories
+2:]  Copy plugins directory only .jpi files    |restart jenkins and upgrade plugins
+3:]  Copy users directory for migration of users
+4:]  compare config.xml file and add role base autherization
+5:]  Enable safe html in configure global security
+6:]  copy .profile
+7:]  install jenkins python3 pip3 aws
+8:] Install ruby from root yum install ruby -y
+9:] install rvm
+10] install ruby required version using rvm install
+11:] install ansible by running yum install ansible -y
+12:] change the ansible .cfg file

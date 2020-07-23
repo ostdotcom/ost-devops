@@ -1,0 +1,9 @@
+---
+
+rabbitmq_user: "rabbitmq"
+rabbitmq_group: "rabbitmq"
+rabbitmq_mnesia_path: "/mnt/rabbitmq"
+erlang_cookie: "RNPRIJKKGUEHUNJSTHIR"
+rabbit_package_name: "rabbitmq-server-3.7.3"
+erlang_package: "erlang-20.3.8.21"
+

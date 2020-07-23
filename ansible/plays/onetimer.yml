@@ -1,0 +1,14 @@
+---
+
+- name: Execute onetimer task
+  hosts: all
+  remote_user: centos
+  become: yes
+  become_method: sudo
+  any_errors_fatal: true
+
+  tasks:
+  - name: "Include role: onetimer"
+    include_role:
+      name: onetimer
+

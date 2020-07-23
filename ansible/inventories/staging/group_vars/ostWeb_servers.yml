@@ -1,0 +1,31 @@
+---
+
+server_type: rails
+is_web: true
+asset_upload_required: true
+domain: stagingost.com
+builds_path: deployment_ost/builds
+
+gemset_wrappers: "{{deploy_home}}/.rvm/gems/ruby-2.5.3@ost_web_gemset/wrappers"
+
+nginx:
+  worker_processes: 2
+  passenger_max_pool_size: 2
+  passenger_min_instances: 1
+  listen_port: 8086
+  logs_dir: "{{ logs_dir }}/nginx"
+  pid_dir: "{{pid_dir}}"
+  rate_limit:
+    zone_size: 30m
+    rate: "5r/s"
+    burst_size: 20
+    delay: 10
+    limit_key: "$remote_addr"
+  realip_from:
+    - 121.141.0.0/20
+    - 121.141.64.0/20
+    - 121.142.0.0/20
+    - 121.142.64.0/20
+
+
+

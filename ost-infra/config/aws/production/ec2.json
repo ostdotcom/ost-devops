@@ -1,0 +1,68 @@
+{
+  "ec2": {
+    "ImageId": "ami-0727888d2084b214b",
+    "InstanceType": "",
+    "KeyName": "",
+    "MinCount": 1,
+    "MaxCount": 1,
+    "DisableApiTermination": true,
+    "BlockDeviceMappings": [],
+    "IamInstanceProfile": {},
+    "TagSpecifications": []
+  },
+
+  "KeyName_default": {
+    "KeyName": "ost-platform-sand-internal"
+  },
+
+  "KeyName_main": {
+    "KeyName": "ost-platform-main-internal"
+  },
+
+  "rootVolumeMap": {
+    "DeviceName": "/dev/sda1",
+    "Ebs": {"VolumeSize": "15", "VolumeType": "gp2", "SnapshotId": "snap-0a3322938e98ec608", "DeleteOnTermination": true}
+  },
+
+  "dataVolumeMap": {
+    "DeviceName": "/dev/sdb",
+    "Ebs": {"VolumeSize": "", "VolumeType": "", "SnapshotId": "snap-03e4d461a7014f6c7", "DeleteOnTermination": true}
+  },
+
+  "nameTag": {
+    "Key": "Name",
+    "Value": ""
+  },
+
+  "purposeTag": {
+    "Key": "Purpose",
+    "Value": ""
+  },
+
+  "appNameTag": {
+    "Key": "AppName",
+    "Value": ""
+  },
+
+  "appEnvTag": {
+    "Key": "AppEnv",
+    "Value": ""
+  },
+
+  "envTag": {
+    "Key": "env",
+    "Value": ""
+  },
+
+  "subEnvTag": {
+    "Key": "SubEnv",
+    "Value": ""
+  },
+
+  "groupTag": {
+    "Key": "GroupName",
+    "Value": ""
+  },
+
+  "ec2InstanceProfileRoleARN": "arn:aws:iam::{awsAccountId}:instance-profile/ec2_instance_profile"
+}

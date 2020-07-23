@@ -1,0 +1,32 @@
+1:  Select domain name according to the type of env
+    saas_{type of env prod or staging}_{usage_testnet or mainnet}
+
+2: Currently ES is working with version 6.2
+   Select data node  count
+   Select the instance type
+   select if dedicated master is needed
+   Enable zone awareness if high availability is needed
+
+3: Select storage type to EBS
+   Select disk type to General purpose ssd
+   select the ebs volume size according to the requirement
+   Encryption at rest is currently disabled but should be enabled in production
+
+4: Select proper VPC ,Subnet "{ost-sand-saas-private-1a}" and Security Group "ost-sand-saas-private-1a"
+
+5: Make the access policy like below so as to allow your vpc to access es endpoint
+
+   Example
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Principal": {
+           "AWS": "*"
+         },
+         "Action": "es:*",
+         "Resource": "arn:aws:es:us-east-1:{Enter account no here}:domain/{enter domain name here}/*"
+       }
+     ]
+   }

@@ -1,0 +1,45 @@
+---
+
+- name: remove tars from /tmp
+  file:
+    path: "/tmp/*"
+    state: absent
+
+- name: get nagios nrpe.plugin
+  shell: |
+    cd /tmp
+    wget -O nrpe.tar.gz https://github.com/NagiosEnterprises/nrpe/releases/download/nrpe-3.2.1/nrpe-3.2.1.tar.gz
+    tar xzf nrpe.tar.gz
+  become: true
+
+- name: compile nrpe from source
+  shell: |
+    cd /tmp/nrpe-3.2.1/
+    sh configure --enable-command-args --with-nrpe-group={{deploy_user}}  --with-nrpe-user={{deploy_user}}  --with-nagios-user={{deploy_user}} --with-command-group={{deploy_user}} --with-nagios-group={{deploy_user}} --with-ssl=/usr/bin/openssl --with-ssl-lib=/usr/lib/x86_64-linux-gnu
+    make all
+    make install
+    make install-config
+    make install-init
+  become: true
+
+- name:  install nagios-plugins
+  shell: |
+    yum install -y gcc glibc glibc-common make gettext automake autoconf wget openssl-devel net-snmp net-snmp-utils epel-release
+     yum install -y perl-Net-SNMP
+     cd /tmp
+     wget --no-check-certificate -O nagios-plugins.tar.gz https://github.com/nagios-plugins/nagios-plugins/archive/release-2.2.1.tar.gz
+     tar zxf nagios-plugins.tar.gz
+     cd /tmp/nagios-plugins-release-2.2.1/
+     sh tools/setup
+     sh configure --with-nagios-user={{root_user}} --with-nagios-group={{deploy_user}} --with-openssl
+     make
+     make install
+    yum install -y nagios-plugins-perl
+    echo "export PERL5LIB=$PERL5LIB:/usr/local/nagios/libexec" >> /etc/profile.d/nagiosplugins.sh
+    yum install -y python36-setuptools
+    easy_install-3.6 pip
+    /usr/local/bin/pip3 install requests
+  become: true
+
+
+

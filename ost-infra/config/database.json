@@ -1,0 +1,11 @@
+{
+  "development": {
+    "driver": "mysql",
+    "host": {"ENV": "INFRA_MYSQL_HOST"},
+    "user": {"ENV": "INFRA_MYSQL_USER"},
+    "password": {"ENV": "INFRA_MYSQL_PASSWORD"},
+    "database": {"ENV": "INFRA_MYSQL_DB"},
+    "port": {"ENV": "INFRA_MYSQL_PORT"},
+    "multipleStatements": true
+  }
+}

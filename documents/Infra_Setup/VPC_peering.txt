@@ -1,0 +1,21 @@
+
+
+Create new CIDR in case of CIDR conflict
+
+Create VPC peering
+
+make enteries in route table
+
+Make proper enteries in security groups
+
+Create private DNS resolution if the account is different and you are you sing DNS names in the env variables
+
+Create new subnets if you have created new CIDRs
+
+Add subnet association to route table
+
+Create new AMI and IAM  role
+
+
+Allow devops.stagingost.com to get builds from the new account
+

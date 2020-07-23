@@ -1,0 +1,10 @@
+---
+
+- name: Flush cache
+  become_user: "{{ deploy_user }}"
+  shell: |
+    /bin/bash -l -c 'sh -x ~/deploy/flush_cache.sh {{server_type}} {{current_path}} "{{flushOptions}}"'
+  run_once: true
+  register: out
+
+- debug: var=out.stdout_lines

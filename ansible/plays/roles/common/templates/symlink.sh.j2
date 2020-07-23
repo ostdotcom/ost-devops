@@ -1,0 +1,94 @@
+#!/bin/bash
+start_time=`date +%s`
+RPM_VERSION=$1;
+APPLICATION=$2;
+ENV={{env}};
+
+base_directory={{app_base_directory}};
+workspace={{workspace}};
+profile_vars_dir={{profile_vars_dir}};
+user={{deploy_user}};
+group={{deploy_group}};
+
+app_base_dir=$base_directory/$APPLICATION;
+release_path=$app_base_dir/releases/$RPM_VERSION;
+
+# Include common functions
+. ./common_functions.sh
+
+if [[ -z $RPM_VERSION ]]; then
+    echo "Invalid RPM_VERSION!";
+    exit 1;
+fi
+
+valid_env=$(is_valid_env $ENV);
+if [[ $valid_env -eq 0 ]]; then
+    echo "Invalid ENV!";
+    exit 1;
+fi
+
+valid_app=$(is_valid_app $APPLICATION);
+if [[ $valid_app -eq 0 ]]; then
+    echo "Invalid APPLICATION!";
+    exit 1;
+fi
+
+number_of_versions_to_maintain=10;
+echo "Remove older releases [START]";
+ls -1dt $app_base_dir/releases/* | tail -n +$number_of_versions_to_maintain | xargs rm -rf;
+echo "Remove older releases [DONE]";
+
+# Symlinking
+echo "Symlink [START]";
+
+if [[ -d $release_path/log_bak ]]; then
+  	rm -rf $release_path/log_bak;
+fi
+
+current_path="$app_base_dir/current";
+ln -snf $release_path $current_path;
+
+mkdir -p $release_path/log;
+
+mv $release_path/log $release_path/log_bak;
+if [[ $? != 0 ]]; then
+	printf "\nError moving log dir!\n" ; exit 1;
+fi
+
+ln -s "$app_base_dir/shared/log/" $release_path/log;
+if [[ $? != 0 ]]; then
+	printf "\nError linking log dir!\n" ; exit 1;
+fi
+chown -R $user:$group $release_path/log;
+
+ln -snf "$app_base_dir/shared/tmp/" $release_path/tmp;
+if [[ $? != 0 ]]; then
+    printf "\nError linking tmp dir!\n" ; exit 1;
+fi
+
+echo "Symlink [DONE]";
+
+dir_perm=0750;
+chown -R $user:$group $release_path;
+chown -R $user:$group $current_path;
+chmod -R $dir_perm $release_path;
+chmod -R $dir_perm $current_path;
+chmod -R $dir_perm "$app_base_dir/shared/log";
+
+cd $workspace;
+
+# Update ENV config vars
+echo "Apply ENV config file [START]";
+
+temp_env_file=$workspace/${APPLICATION}_vars.sh;
+bash_env_file=$profile_vars_dir/${APPLICATION}_vars.sh;
+
+cp -Lf $temp_env_file $bash_env_file;
+rm -f $temp_env_file;
+source $bash_env_file;
+
+echo "Apply ENV config file [DONE]";
+stop_time=`date +%s`
+time_taken=$[${stop_time}-${start_time}]
+
+echo "start time : ${start_time}  stop time : ${stop_time} time taken : ${time_taken} second"

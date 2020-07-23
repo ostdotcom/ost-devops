@@ -1,0 +1,50 @@
+#!/usr/bin/env python3.6
+
+import sys
+import subprocess
+import re
+import os
+
+if len(sys.argv) <= 2:
+	sys.exit('Missing args!')
+
+geth_node_id = sys.argv[1]
+temp_env_file = sys.argv[2]
+
+
+geth_port = '{{ utility_node_sync_port }}'
+uc_geth_node_dir = '{{uc_geth_node_dir}}'
+chain_id = '{{chain_id}}'
+nodeType='{{nodeType}}'
+# Init utility node
+status=subprocess.getstatusoutput('geth --datadir %s/%s init %s/uc_genesis.json' % (uc_geth_node_dir, geth_node_id, uc_geth_node_dir))
+if status[0] != 0:
+  sys.exit("geth init failed ")
+# Get node id
+out_bytes = subprocess.check_output(['geth', '--networkid', '%s' % chain_id, '--datadir', '%s/%s' % (uc_geth_node_dir, geth_node_id), '--port', '%s' % geth_port, 'console', '--exec', 'admin.nodeInfo.enode'])
+out_str = out_bytes.decode('utf-8').strip()
+if len(out_str) < 1 :
+  sys.exit("admin.nodeInfo.enode command failed ")
+# get ip address
+my_ip = subprocess.getstatusoutput('hostname -i')[1].strip()
+
+enode_str = out_str.replace('127.0.0.1', my_ip)
+
+subprocess.getstatusoutput('echo %s > %s' % (enode_str,temp_env_file))
+
+if nodeType == "sealerNode" :
+    sealer_address= sys.argv[3]
+    private_key= sys.argv[4]
+    sealer_password=sys.argv[5]
+    private_key=private_key.replace('0x','')
+    with open("/tmp/private_key", "w") as text_file:
+        text_file.write(private_key)
+    with open("{{ uc_geth_node_dir }}/pwfile", "w") as text_file:
+        text_file.write(sealer_password)
+    with open("/tmp/password", "w") as text_file:
+        text_file.write(sealer_password)
+    status=subprocess.getstatusoutput('geth account import --datadir %s/%s --keystore %s/keystore --password /tmp/password /tmp/private_key ' % (uc_geth_node_dir,geth_node_id,uc_geth_node_dir))
+    os.remove('/tmp/password')
+    os.remove('/tmp/private_key')
+    if status[0] != 0:
+          sys.exit("geth account import  failed ")

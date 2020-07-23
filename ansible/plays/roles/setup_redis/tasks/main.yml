@@ -1,0 +1,8 @@
+---
+# tasks file for roles/setup_redis
+
+- name: Setup Redis server
+  include_tasks: redis.yml
+  when: redis_server_required is defined and redis_server_required|bool
+
+

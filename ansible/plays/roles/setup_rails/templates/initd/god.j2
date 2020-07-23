@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# God
+#
+# chkconfig: - 85 15
+#
+### BEGIN INIT INFO
+# Provides: god-sidekiq-api
+# Required-Start: $local_fs $remote_fs $network
+# Required-Stop: $local_fs $remote_fs $network
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: god-sidekiq-api
+# Description: start and stop sidekiq worker
+### END INIT INFO
+#
+
+. /etc/rc.d/init.d/functions
+
+source ~/.bash_profile
+
+RETVAL=0
+GOD_BIN={{ god.bin }}
+GOD_PORT={{god.port}}
+GOD_LOG={{god.log_dir}}/{{application}}.log
+GOD_CONF={{god.conf_dir}}/{{application}}.conf
+
+case "$1" in
+    start)
+      $GOD_BIN -l $GOD_LOG -c $GOD_CONF -p $GOD_PORT
+      RETVAL=$?
+      if [[ $RETVAL -eq 0 ]] ; then echo "God started successfully."; fi
+      ;;
+    stop)
+      $GOD_BIN terminate -p $GOD_PORT
+      RETVAL=$?
+      if [[ $RETVAL -eq 0 ]] ; then echo "God stopped successfully."; fi
+      ;;
+    restart)
+      $GOD_BIN terminate -p $GOD_PORT
+      $GOD_BIN  -l $GOD_LOG -c $GOD_CONF -p $GOD_PORT
+      RETVAL=$?
+      if [[ $RETVAL -eq 0 ]] ; then echo "God restarted successfully."; fi
+      ;;
+    status)
+      $GOD_BIN status
+      RETVAL=$?
+      ;;
+    *)
+      echo "Usage: god {start|stop|restart|status}"
+      exit 1
+  ;;
+esac
+
+exit $RETVAL

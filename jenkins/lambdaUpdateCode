@@ -1,0 +1,8 @@
+#!/usr/bin/env groovy
+
+node {
+  def commonFunctions = load "${WORKSPACE}@script/jenkins/commonFunctions/commonFunctions.groovy"
+  stage "Update Lambda Function Code"
+    commonFunctions.lambdaUpdateCode("${PLATFORM}", "${ENV}", "${SUB_ENV}", "${APPLICATION}", "${BRANCH_NAME}")
+    currentBuild.description="PLATFORM:${PLATFORM} SUB_ENV:${SUB_ENV} ENV:${ENV} APPLICATION:${APPLICATION} BRANCH_NAME:${BRANCH_NAME}"
+}

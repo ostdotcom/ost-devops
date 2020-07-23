@@ -1,0 +1,15 @@
+---
+
+- name: Setup Value node
+  hosts: all
+  remote_user: centos
+  become: yes
+  become_method: sudo
+  any_errors_fatal: true
+
+
+  tasks:
+  - name: Include setup value node
+    include_role:
+      name: value_node
+

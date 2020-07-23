@@ -1,0 +1,284 @@
+{
+  "saasApi": {
+    "app": [
+      {
+        "ec2RequestParams": {
+          "appName": "App 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.micro"
+        }
+      }
+    ],
+    "cron": [
+      {
+        "ec2RequestParams": {
+          "appName": "Cron 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.micro"
+        },
+        "appData": {
+          "jobs": [
+            {"name": "workflowRouterFactory"},
+            {"name": "originFinalizer"},
+            {"name": "originBlockParser"},
+            {"name": "originTransactionParser"},
+            {"name": "fundByMasterInternalFunderOriginChainSpecific"},
+            {"name": "updateRealTimeGasPrice"},
+            {"name": "cronProcessesMonitor"}
+          ]
+        }
+      },
+      {
+        "ec2RequestParams": {
+          "appName": "Cron 2",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.medium",
+          "chainId": "{{chainId}}"
+        },
+        "appData": {
+          "jobs": [
+            {"name": "auxBlockParser"},
+            {"name": "auxTransactionParser"},
+            {"name": "auxFinalizer"},
+            {"name": "economyAggregator"},
+            {"name": "fundByMasterInternalFunderAuxChainSpecificChainAddresses"},
+            {"name": "fundBySealerAuxChainSpecific"},
+            {"name": "fundByTokenAuxFunderAuxChainSpecific"},
+            {"name": "updatePriceOraclePricePoints"},
+            {"name": "fundByMasterInternalFunderAuxChainSpecificTokenFunderAddresses"},
+            {"name": "fundByMasterInternalFunderAuxChainSpecificInterChainFacilitatorAddresses"},
+            {"name": "auxWorkflowRouterFactory"},
+            {"name": "balanceSettler"},
+            {"name": "executeTransaction"},
+            {"name": "transactionErrorHandler"},
+            {"name": "originToAuxStateRootSync"},
+            {"name": "auxToOriginStateRootSync"},
+            {"name": "fundByTokenAuxFunderToExTxWorkers"},
+            {"name": "executeRecovery"},
+            {"name": "balanceVerifier"},
+            {"name": "generateGraph"}
+          ]
+        }
+      }
+    ]
+  },
+  "api": {
+    "app": [
+      {
+        "ec2RequestParams": {
+          "appName": "Web and Api App 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano"
+        }
+      },
+      {
+        "ec2RequestParams": {
+          "appName": "Web and Api App 2",
+          "availZone": "1b",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano"
+        }
+      }
+    ],
+    "cron": [
+      {
+        "ec2RequestParams": {
+          "appName": "Sidekiq 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano"
+        },
+        "appData": {
+          "jobs": [
+            {"name": "process_email_service_api_call_hooks"}
+          ],
+          "redis_server_required": true,
+          "sidekiq_required": true
+        }
+      }
+    ]
+  },
+  "ostView": {
+    "app": [
+      {
+        "ec2RequestParams": {
+          "appName": "App 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano"
+        },
+        "appData": {
+        "jobs": [
+          {"name": "GlobalAggregatorCron"}
+        ]
+        }
+      }
+    ]
+  },
+  "ostAnalytics":{
+    "app": [
+      {
+        "ec2RequestParams": {
+          "appName": "App and Cron",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.micro"
+        },
+        "appData": {
+          "jobs": [
+            {"name": "extractAndTransform"},
+            {"name": "extractAndTransformDaily"}
+          ]
+        }
+      }
+    ]
+  },
+  "utility": {
+    "cron": [
+      {
+        "ec2RequestParams": {
+          "appName": "Sealer Node 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano",
+          "chainId": "{{chainId}}"
+        },
+        "appData": {
+          "nodeType": "sealerNode",
+          "isPrimarySealer": true
+        }
+      },
+      {
+        "ec2RequestParams": {
+          "appName": "Sealer Node 2",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano",
+          "chainId": "{{chainId}}"
+        },
+        "appData": {
+          "nodeType": "sealerNode"
+        }
+      },
+      {
+        "ec2RequestParams": {
+          "appName": "Sealer Node 3",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano",
+          "chainId": "{{chainId}}"
+        },
+        "appData": {
+          "nodeType": "sealerNode"
+        }
+      },
+      {
+        "ec2RequestParams": {
+          "appName": "Private Node 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano",
+          "chainId": "{{chainId}}"
+        },
+        "appData": {
+          "nodeType": "privateNode"
+        }
+      }
+    ]
+  },
+  "value": {
+    "app": [
+      {
+        "ec2RequestParams": {
+          "appName": "Value Node 1",
+          "availZone": "1a",
+          "volumeSize": 150,
+          "instanceType": "t3a.xlarge",
+          "chainId": "{{chainId}}"
+        }
+      }
+    ]
+  },
+  "rabbitSaasApi": {
+    "app": [
+      {
+        "ec2RequestParams": {
+          "appName": "Rabbit Node 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano",
+          "chainId": "{{chainId}}"
+        }
+      }
+    ]
+  },
+  "ostWeb": {
+    "app": [
+      {
+        "ec2RequestParams": {
+          "appName": "App 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano"
+        },
+        "appData": {
+          "jobs": [
+            {"name": "set_dynamic_content_cache"}
+            ]
+        }
+      }
+    ]
+  },
+  "ostInfra": {
+    "cron": [
+      {
+        "ec2RequestParams": {
+          "appName": "ostInfra Node 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano"
+        }
+      }
+    ]
+  },
+  "cmsApi": {
+    "app": [
+      {
+        "ec2RequestParams": {
+          "appName": "cmsWeb and cmsApi App 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano"
+        }
+      }
+    ]
+  },
+  "mappyApi": {
+    "app": [
+      {
+        "ec2RequestParams": {
+          "appName": "mappyApi App 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano"
+        }
+      }
+    ]
+  },
+  "ostOrg": {
+    "app": [
+      {
+        "ec2RequestParams": {
+          "appName": "ostOrg App 1",
+          "availZone": "1a",
+          "volumeSize": 15,
+          "instanceType": "t3a.nano"
+        }
+      }
+    ]
+  }
+}

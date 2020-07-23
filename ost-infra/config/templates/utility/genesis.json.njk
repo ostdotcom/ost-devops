@@ -1,0 +1,39 @@
+{
+  "config": {
+    "chainId": {{chainId}},
+    "homesteadBlock": 1,
+    "eip150Block": 2,
+    "eip150Hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "eip155Block": 3,
+    "eip158Block": 3,
+    "byzantiumBlock": 4,
+    {% if constantinopleBlock  is defined and constantinopleBlock  is not null %}
+    "constantinopleBlock": {{constantinopleBlock}},
+    {% endif %}
+    {% if petersburgBlock is defined and petersburgBlock  is not null %}
+    "petersburgBlock": {{petersburgBlock}},
+    {%- endif -%}
+    {% if istanbulBlock is defined and  istanbulBlock  is not null %}
+    "istanbulBlock": {{istanbulBlock}},
+    {% endif %}
+    "clique": {
+      "period": 3,
+      "epoch": 30000
+    }
+  },
+  "nonce": "0x0",
+  "timestamp": "0x5a71660b",
+  "extraData": "0x7574696c69747920636861696e00000000000000000000000000000000000000{{sealerAddress}}0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "gasLimit": "0x989680",
+  "difficulty": "0x1",
+  "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "coinbase": "0x0000000000000000000000000000000000000000",
+  "alloc": {
+    "{{masterIntFunderAddress}}": {
+      "balance": "0x295be96e640669720000000"
+    }
+  },
+  "number": "0x0",
+  "gasUsed": "0x0",
+  "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+}

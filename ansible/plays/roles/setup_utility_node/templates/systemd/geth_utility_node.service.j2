@@ -1,0 +1,29 @@
+[Unit]
+Description=geth_un - Geth node for utility chain
+After=remote-fs.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=deployer
+Type=simple
+Restart=always
+RestartSec=1
+
+{% if nodeType is defined and nodeType == "publicNode" %}
+ExecStart=/bin/bash -l -c 'geth  --networkid {{chain_id}} --datadir {{ uc_geth_node_dir }}/{{geth_node_id}} --port {{utility_node_sync_port}} --rpc  --rpcaddr 127.0.0.1 --rpcapi web3,net,eth --rpcport {{utility_node_rpcport}} --targetgaslimit {{utility_node_targetgaslimit}} 1>> {{chain_logs_dir}}/{{geth_node_id}}.log 2>&1'
+
+{% elif nodeType is defined and nodeType == "sealerNode" and insecure_unlock is sameas true %}
+ExecStart=/bin/bash -l -c 'geth   --nodiscover --networkid {{chain_id}} --datadir {{ uc_geth_node_dir }}/{{geth_node_id}} --keystore {{ uc_geth_node_dir }}/keystore --allow-insecure-unlock --rpc  --rpcaddr 127.0.0.1  --rpcapi web3,net,eth --rpcport {{utility_node_rpcport}}  --mine --unlock {{address}} --password {{ uc_geth_node_dir }}/pwfile  --port {{utility_node_sync_port}} --miner.gastarget {{utility_node_targetgaslimit}} --miner.gaslimit {{utility_node_targetgaslimit}} --miner.gasprice $UTILITY_GAS_PRICE --txpool.accountslots 2048 --txpool.globalslots 50000 --txpool.accountqueue 100000 --txpool.globalqueue 20480000  1>> {{chain_logs_dir}}/{{geth_node_id}}.log 2>&1'
+{% elif nodeType is defined and nodeType == "sealerNode"  %}
+ExecStart=/bin/bash -l -c 'geth   --nodiscover --networkid {{chain_id}} --datadir {{ uc_geth_node_dir }}/{{geth_node_id}} --keystore {{ uc_geth_node_dir }}/keystore --rpc  --rpcaddr 127.0.0.1  --rpcapi web3,net,eth --rpcport {{utility_node_rpcport}}  --mine --unlock {{address}} --password {{ uc_geth_node_dir }}/pwfile  --port {{utility_node_sync_port}} --miner.gastarget {{utility_node_targetgaslimit}} --miner.gaslimit {{utility_node_targetgaslimit}} --miner.gasprice $UTILITY_GAS_PRICE --txpool.accountslots 2048 --txpool.globalslots 50000 --txpool.accountqueue 100000 --txpool.globalqueue 20480000  1>> {{chain_logs_dir}}/{{geth_node_id}}.log 2>&1'
+{% else %}
+ExecStart=/bin/bash -l -c 'geth  --nodiscover --networkid {{chain_id}} --datadir {{ uc_geth_node_dir }}/{{geth_node_id}} --keystore {{ uc_geth_node_dir }}/keystore  --port {{utility_node_sync_port}} --rpc --rpcvhosts "*" --rpcaddr 0.0.0.0 --rpcapi eth,net,web3,personal,txpool --rpcport {{utility_node_rpcport}} --ws --wsapi eth,net,web3,personal,txpool --wsaddr $(hostname -i) --wsport {{utility_node_wsport}} --wsorigins "*"   --txpool.accountslots 2048 --txpool.globalslots 50000 --txpool.accountqueue 100000 --txpool.globalqueue 20480000 1>> {{chain_logs_dir}}/{{geth_node_id}}.log 2>&1'
+
+{% endif %}
+
+KillSignal=SIGINT
+LimitNOFILE=50000
+
+[Install]
+WantedBy=multi-user.target

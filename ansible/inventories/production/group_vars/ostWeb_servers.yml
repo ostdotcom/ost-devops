@@ -1,0 +1,29 @@
+---
+
+server_type: rails
+is_web: true
+asset_upload_required: true
+domain: ost.com
+builds_path: deployment_ost/builds
+
+gemset_wrappers: "{{deploy_home}}/.rvm/gems/ruby-2.5.3@ost_web_gemset/wrappers"
+
+nginx:
+  worker_processes: 2
+  passenger_max_pool_size: 2
+  passenger_min_instances: 1
+  listen_port: 8086
+  logs_dir: "{{ logs_dir }}/nginx"
+  pid_dir: "{{pid_dir}}"
+  rate_limit:
+    burst_size: 20
+    delay: 10
+    zone_size: 30m
+    rate: "5r/s"
+    limit_key: "$remote_addr"
+  realip_from:
+    - 10.49.0.0/20
+    - 10.49.64.0/20
+    - 10.50.0.0/20
+    - 10.50.64.0/20
+

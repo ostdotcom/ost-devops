@@ -1,0 +1,46 @@
+---
+
+# Create log and conf dir
+- name: Create required dirs
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ deploy_user }}"
+    group: "{{ item.group }}"
+    mode: "{{item.mode}}"
+  with_items:
+    - {path: "{{ god.log_dir }}", mode: "0755", group: "{{ deploy_group }}"}
+    - {path: "{{ god.conf_dir }}/{{application}}", mode: "0750", group: "{{ deploy_user }}"}
+
+# god config files
+- name: "Create god conf file for {{ application }}"
+  template:
+    src: "configs/god-{{application}}.conf.j2"
+    dest: "{{ god.conf_dir }}/{{application}}.conf"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0750
+
+
+- name: "Update sidekiq god config for {{application}}"
+  template:
+    src: "god/{{item}}.god.j2"
+    dest: "{{ god.conf_dir }}/{{application}}/{{item}}.god"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0750
+  with_items:
+    - sidekiq
+    - boot
+
+# init.d service files
+- name: "Create initd file for {{ application }}"
+  template:
+    src: "initd/god.j2"
+    dest: "{{ initd_files_path }}/{{application}}_cron_god"
+    mode: 0750
+
+- name: enable init.d service to start on boot
+  shell: |
+    /sbin/chkconfig "{{application}}_cron_god" on

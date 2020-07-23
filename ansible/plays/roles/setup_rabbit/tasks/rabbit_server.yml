@@ -1,0 +1,49 @@
+---
+
+- name: Copy common env file from local
+  copy:
+    src: "{{ local_config_path }}/{{ local_common_env_file }}"
+    dest: "{{ custom_env_files_dir }}/{{ common_env_file }}"
+
+- name: Add rabbit-erlang repo
+  template:
+    src: rabbitmq-erlang.repo.j2
+    dest: /etc/yum.repos.d/rabbitmq-erlang.repo
+
+- name: Install rabbit-server rpm
+  yum:
+    name: erlang-erts-R16B-03.18.el7.x86_64
+    state: absent
+
+- name: Install rabbit-server rpm
+  yum:
+    name:
+      - "{{erlang_package}}"
+      - "{{rabbit_package_name}}"
+    state: present
+
+- name: Create root dir structure for rabbit
+  file:
+    path: "{{rabbitmq_mnesia_path}}"
+    state: directory
+    owner: "{{rabbitmq_user}}"
+    group: "{{ rabbitmq_group }}"
+    mode: 755
+
+- name: Copy env.conf template
+  template: src=rabbitmq-env.conf.j2 dest=/etc/rabbitmq/rabbitmq-env.conf  owner=rabbitmq group=rabbitmq mode=0644
+
+- name: Copy rabbit service
+  template: src=rabbitmq-server.service.j2 dest=/usr/lib/systemd/system/rabbitmq-server.service  owner=root group=root mode=0644
+
+- name: Start Rabbitmq_server
+  systemd:
+    name: rabbitmq-server
+    daemon_reload: yes
+    state: started
+    enabled: yes
+
+- name: Enables the rabbitmq_management plugin
+  rabbitmq_plugin:
+    names: rabbitmq_management
+    state: enabled

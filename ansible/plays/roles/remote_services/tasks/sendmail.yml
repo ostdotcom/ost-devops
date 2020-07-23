@@ -1,0 +1,5 @@
+---
+
+- name: Include task from sendmail
+  include_role:
+    name: sendmail

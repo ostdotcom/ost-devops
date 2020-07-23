@@ -1,0 +1,17 @@
+---
+# tasks file for roles/setup_nodejs
+
+# Setup common deployment tasks
+- name: Include deployment setup from common role
+  include_role:
+    name: common
+    tasks_from: deploy_setup
+
+
+
+- include_role:
+    name: common
+    tasks_from: update_nginx_conf
+  when: nginx is defined and role is defined and role == 'app' and is_socket_server is not defined
+
+

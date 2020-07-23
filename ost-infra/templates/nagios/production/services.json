@@ -1,0 +1,334 @@
+{
+  "checkUsers": {
+    "serviceName": "checkUsers",
+    "serviceDesc": "Check the number of users that are logged in ",
+    "commandName": "check_users",
+    "args": {
+      "service": "!10!15",
+      "command": "$ARG1$ $ARG2$",
+      "nrpe": "-w $ARG1$ -c $ARG2$"
+    }
+  },
+  "checkLoad": {
+    "serviceName": "checkLoad",
+    "serviceDesc": "Check Load per cpu  ",
+    "commandName": "check_load",
+    "args": {
+      "service": "!0.80,0.80,0.80!0.85,0.85,0.85",
+      "command": "$ARG1$ $ARG2$ ",
+      "nrpe": "-r -w $ARG1$ -c $ARG2$"
+    }
+  },
+  "4vCPUCheckLoad": {
+    "serviceName": "4vCPUCheckLoad",
+    "serviceDesc": "Check Load per cpu  ",
+    "commandName": "check_load",
+    "args": {
+      "service": "!3.6,2.8,2.0!4.0,3.2,2.4",
+      "command": "$ARG1$ $ARG2$ ",
+      "nrpe": " -w $ARG1$ -c $ARG2$"
+    }
+  },
+  "checkMntDisk": {
+    "serviceName": "checkMntDisk",
+    "serviceDesc": "Check %use of /mnt",
+    "commandName": "check_disk",
+    "args": {
+      "service": "!15%!10%!/mnt",
+      "command": "$ARG1$ $ARG2$ $ARG3$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -p $ARG3$"
+    }
+  },
+  "checkRootDisk": {
+    "serviceName": "checkRootDisk",
+    "serviceDesc": "Check %use of /",
+    "commandName": "check_disk",
+    "args": {
+      "service": "!15%!10%!/",
+      "command": "$ARG1$ $ARG2$ $ARG3$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -p $ARG3$"
+    }
+  },
+  "checkDeployerProcess": {
+    "serviceName": "checkDeployerProcess",
+    "serviceDesc": "Check no of processes up by user deployer",
+    "commandName": "check_procs",
+    "args": {
+      "service": "!150!170",
+      "command": "$ARG1$ $ARG2$ ",
+      "nrpe": "-u deployer -w $ARG1$ -c $ARG2$"
+    }
+  },
+  "checkZombieProcess": {
+    "serviceName": "checkZombieProcess",
+    "serviceDesc": "Check no of processes up by user deployer",
+    "commandName": "check_procs",
+    "args": {
+      "service": "!2!5",
+      "command": "$ARG1$ $ARG2$ ",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -s Z"
+    }
+  },
+  "checkStoppedProcess": {
+    "serviceName": "checkStoppedProcess",
+    "serviceDesc": "Check no of stopped processes",
+    "commandName": "check_procs",
+    "args": {
+      "service": "!2!5",
+      "command": "$ARG1$ $ARG2$ ",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -s T"
+    }
+  },
+  "checkSleepingProcess": {
+    "serviceName": "checkSleepingProcess",
+    "serviceDesc": "Check no of sleeping processes",
+    "commandName": "check_procs",
+    "args": {
+      "service": "!2!5",
+      "command": "$ARG1$ $ARG2$ ",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -s D"
+    }
+  },
+  "checkOpenFiles": {
+    "serviceName": "checkOpenFiles",
+    "serviceDesc": "check no of open files ",
+    "commandName": "check_open_files.pl",
+    "args": {
+      "service": "!1!2",
+      "command": "$ARG1$ $ARG2$",
+      "nrpe": "-w $ARG1$ -c $ARG2$"
+    }
+  },
+  "checkAuxWorkflow": {
+    "serviceName": "checkAuxWorkflow",
+    "serviceDesc": "checks if rabbit is working properly",
+    "commandName": "check_rabbitmq.py",
+    "args": {
+      "service": "!100!200!auxWorkflow",
+      "command": "$ARG1$ $ARG2$  $ARG3$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -q $ARG3$"
+    }
+  },
+  "checkMemory": {
+    "serviceName": "checkMemory",
+    "serviceDesc": "check Free memory ",
+    "commandName": "check_mem.sh",
+    "args": {
+      "service": "!80!85!/mnt",
+      "command": "$ARG1$ $ARG2$",
+      "nrpe": "-w $ARG1$ -c $ARG2$"
+    }
+  },
+  "checkSwap": {
+    "serviceName": "checkSwap",
+    "serviceDesc": "Description!",
+    "commandName": "check_swap",
+    "args": {
+      "service": "!50%!40%",
+      "command": "$ARG1$ $ARG2$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ "
+    }
+  },
+  "checkGethSwap": {
+    "serviceName": "checkGethSwap",
+    "serviceDesc": "Description!",
+    "commandName": "check_swap",
+    "args": {
+      "service": "!40%!30%",
+      "command": "$ARG1$ $ARG2$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ "
+    }
+  },
+  "check401": {
+    "serviceName": "check401",
+    "serviceDesc": "Check number of 401 messages from nginx",
+    "commandName": "check_nginx.sh",
+    "args": {
+      "service": "!10!15!5!401!{{application}}",
+      "command": "$ARG1$ $ARG2$ $ARG3$ $ARG4$ $ARG5$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -t $ARG3$ -s $ARG4$ -a $ARG5$"
+    }
+  },
+  "check403": {
+    "serviceName": "check403",
+    "serviceDesc": "Check number of 403 messages from nginx",
+    "commandName": "check_nginx.sh",
+    "args": {
+      "service": "!10!15!5!403!{{application}}",
+      "command": "$ARG1$ $ARG2$ $ARG3$ $ARG4$ $ARG5$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -t $ARG3$ -s $ARG4$ -a $ARG5$"
+    }
+  },
+  "check5xx": {
+    "serviceName": "check5xx",
+    "serviceDesc": "Check number of 5xx messages from nginx",
+    "commandName": "check_nginx.sh",
+    "args": {
+      "service": "!10!15!5!5..!{{application}}",
+      "command": "$ARG1$ $ARG2$ $ARG3$ $ARG4$ $ARG5$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -t $ARG3$ -s $ARG4$ -a $ARG5$"
+    }
+  },
+  "checkTotalRequests":{
+    "serviceName": "checkTotalRequests",
+    "serviceDesc": "checkTotalRequests from nginx",
+    "commandName": "check_nginx.sh",
+    "args": {
+      "service": "!300!350!5!...!{{application}}",
+      "command": "$ARG1$ $ARG2$ $ARG3$ $ARG4$ $ARG5$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -t $ARG3$ -s $ARG4$ -a $ARG5$"
+    }
+  },
+  "check429": {
+    "serviceName": "check429",
+    "serviceDesc": "Check number of 4xx messages from nginx",
+    "commandName": "check_nginx.sh",
+    "args": {
+      "service": "!1!2!5!429!{{application}}",
+      "command": "$ARG1$ $ARG2$ $ARG3$ $ARG4$ $ARG5$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -t $ARG3$ -s $ARG4$ -a $ARG5$"
+    }
+  },
+  "checkTxpoolPending": {
+    "serviceName": "checkTxpoolPending",
+    "serviceDesc": "Check number of pending messages in txpool",
+    "commandName": "check_txpool.sh",
+    "args": {
+      "service": "!1000!1500!pending",
+      "command": "$ARG1$ $ARG2$ $ARG3$ ",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -q $ARG3$ "
+    }
+  },
+  "checkTxpoolQueued": {
+    "serviceName": "checkTxpoolQueued",
+    "serviceDesc": "Check number of queued messages in txpool",
+    "commandName": "check_txpool.sh",
+    "args": {
+      "service": "!1!2!queued",
+      "command": "$ARG1$ $ARG2$ $ARG3$ ",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -q $ARG3$ "
+    }
+  },
+  "checkOpenFiles": {
+    "serviceName": "checkOpenFiles",
+    "serviceDesc": "Check number of queued messages in txpool",
+    "commandName": "check_open_files.pl",
+    "args": {
+      "service": "!2!3",
+      "command": "$ARG1$ $ARG2$",
+      "nrpe": "-w $ARG1$ -c $ARG2$"
+    }
+  },
+  "checkOpenFilesPublicOpsApi": {
+    "serviceName": "checkOpenFilesPublicOpsApi",
+    "serviceDesc": "Check number of queued messages in txpool",
+    "commandName": "check_open_files.pl",
+    "args": {
+      "service": "!10!12",
+      "command": "$ARG1$ $ARG2$",
+      "nrpe": "-w $ARG1$ -c $ARG2$"
+    }
+  },
+  "checkOpenFilesPrivateOpsApi": {
+    "serviceName": "checkOpenFilesPrivateOpsApi",
+    "serviceDesc": "Check number of queued messages in txpool",
+    "commandName": "check_open_files.pl",
+    "args": {
+      "service": "!10!12",
+      "command": "$ARG1$ $ARG2$",
+      "nrpe": "-w $ARG1$ -c $ARG2$"
+    }
+  },
+  "checkBgQueue": {
+    "serviceName": "checkBgQueue",
+    "serviceDesc": "Check rabbit queue bg job  ",
+    "commandName": "check_rabbitmq.py",
+    "args": {
+      "service": "!100!200!bg_job",
+      "command": "$ARG1$ $ARG2$ $ARG3$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -q $ARG3$"
+    }
+  },
+  "checkAuxWorkflow": {
+    "serviceName": "checkAuxWorkflow",
+    "serviceDesc": "Check rabbit queue AuxWorkflow ",
+    "commandName": "check_rabbitmq.py",
+    "args": {
+      "service": "!100!200!auxWorkflow",
+      "command": "$ARG1$ $ARG2$ $ARG3$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -q $ARG3$"
+    }
+  },
+  "checkWorkflow": {
+    "serviceName": "checkWorkflow",
+    "serviceDesc": "Check rabbit queue AuxWorkflow ",
+    "commandName": "check_rabbitmq.py",
+    "args": {
+      "service": "!100!200!workflow",
+      "command": "$ARG1$ $ARG2$ $ARG3$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -q $ARG3$"
+    }
+  },
+  "checkOriginTransactionParser": {
+    "serviceName": "checkOriginTransactionParser",
+    "serviceDesc": "Check rabbit queue AuxWorkflow ",
+    "commandName": "check_rabbitmq.py",
+    "args": {
+      "service": "!100!200!transaction_parser",
+      "command": "$ARG1$ $ARG2$ $ARG3$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -q $ARG3$"
+    }
+  },
+  "checkExecuteTransaction": {
+    "serviceName": "checkExecuteTransaction",
+    "serviceDesc": "Check rabbit queue AuxWorkflow ",
+    "commandName": "check_rabbitmq.py",
+    "args": {
+      "service": "!100!200!execute_transaction",
+      "command": "$ARG1$ $ARG2$ $ARG3$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -q $ARG3$"
+    }
+  },
+  "checkAuxTransactionParser": {
+    "serviceName": "checkAuxTransactionParser",
+    "serviceDesc": "Check rabbit queue AuxWorkflow ",
+    "commandName": "check_rabbitmq.py",
+    "args": {
+      "service": "!100!200!transaction_parser",
+      "command": "$ARG1$ $ARG2$ $ARG3$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -q $ARG3$"
+    }
+  },
+  "checkAggregator": {
+    "serviceName": "checkAggregator",
+    "serviceDesc": "Check rabbit queue AuxWorkflow ",
+    "commandName": "check_rabbitmq.py",
+    "args": {
+      "service": "!100!200!aggregator",
+      "command": "$ARG1$ $ARG2$ $ARG3$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -q $ARG3$"
+    }
+  },
+  "checkAuxTransactionFinalizer": {
+    "serviceName": "checkAuxTransactionFinalizer",
+    "serviceDesc": "Check rabbit queue AuxWorkflow ",
+    "commandName": "check_rabbitmq.py",
+    "args": {
+      "service": "!100!200!transaction_finalizer",
+      "command": "$ARG1$ $ARG2$ $ARG3$",
+      "nrpe": "-w $ARG1$ -c $ARG2$ -q $ARG3$"
+    }
+  },
+
+  "checkSidekiq": {
+    "serviceName": "checkSidekiq",
+    "serviceDesc": "Check sidekiq health  ",
+    "commandName": "check_sidekiq.sh",
+    "args": {
+      "service": "!10!20",
+      "command": "$ARG1$ $ARG2$",
+      "nrpe": "-w $ARG1$ -c $ARG2$"
+    }
+  }
+
+}

@@ -1,0 +1,52 @@
+---
+
+- name: Copy common env file from local
+  copy:
+    src: "{{local_common_env_file}}"
+    dest: "{{ custom_env_files_dir }}/{{ common_env_file }}"
+  when: nodeType != "publicNode"
+
+
+- name: Create systemd file for utility node
+  template:
+    src: "systemd/geth_utility_node.service.j2"
+    dest: "{{ systemd_files_path }}/geth_un.service"
+
+- name: Copy static nodes json file
+  copy:
+    src: "{{enodes_input_file}}"
+    dest: "{{ uc_geth_node_dir }}/{{ geth_node_id }}/geth/static-nodes.json"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0700
+
+- name: Copy genesis file
+  become_user: "{{ deploy_user }}"
+  copy:
+    src: "{{genesis_file}}"
+    dest: "{{ uc_geth_node_dir }}/uc_genesis.json"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0700
+  when: genesis_file is defined
+
+- name: Stop geth utility node
+  systemd:
+    name: geth_un
+    daemon_reload: yes
+    state: stopped
+    enabled: yes
+
+
+- name: init Geth
+  become_user: "{{ deploy_user }}"
+  shell: |
+    geth --datadir "{{ uc_geth_node_dir }}/{{geth_node_id}}" init "{{ uc_geth_node_dir }}/uc_genesis.json"
+  when: genesis_file is defined
+
+- name: Start geth utility node
+  systemd:
+    name: geth_un
+    daemon_reload: yes
+    state: started
+    enabled: yes

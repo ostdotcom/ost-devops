@@ -1,0 +1,38 @@
+{
+  "common": ["checkRootDisk","checkUsers","checkMntDisk","checkDeployerProcess","checkZombieProcess","checkMemory"],
+  "utility": {
+    "cron": ["checkTxpoolPending","checkTxpoolQueued","checkOpenFiles","checkGethSwap","checkLoad"],
+    "app" : ["check401","check429","check5xx","check403","checkLoad"]
+  },
+  "rabbitSaasApi_aux":{
+    "app": ["checkAuxWorkflow","checkExecuteTransaction","checkAuxTransactionParser","checkAggregator","checkAuxTransactionFinalizer","checkOpenFiles","checkSwap","checkLoad"]
+  },
+  "rabbitSaasApi_global":{
+    "app": ["checkWorkflow","checkOpenFiles","checkSwap","checkLoad"]
+  },
+  "rabbitSaasApi_origin":{
+    "app": ["checkOriginTransactionParser","checkOpenFiles","checkSwap","checkLoad"]
+  },
+  "api":{
+    "cron": ["checkSidekiq","checkOpenFiles","checkSwap","checkLoad"],
+    "app" : ["check401","check429","check5xx","checkOpenFiles","checkSwap","checkLoad"]
+  },
+  "web":{
+    "app" : ["check401","check429","check5xx","checkLoad"]
+  },
+  "saasApi":{
+    "app" : ["check401","check429","check5xx","checkOpenFiles","checkSwap","checkLoad"]
+  },
+  "ostView":{
+    "app" : ["check401","check429","check5xx","checkOpenFiles","checkSwap","checkLoad"]
+  },
+  "cmsApi":{
+    "app" : ["check401","check429","check5xx","checkOpenFiles","checkSwap","checkLoad"]
+  },
+  "ostWeb":{
+    "app" : ["check401","check429","check5xx","checkOpenFiles","checkSwap","checkLoad"]
+  },
+  "value":{
+    "app":["checkGethSwap","4vCPUCheckLoad"]
+  }
+}

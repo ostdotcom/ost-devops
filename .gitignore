@@ -1,0 +1,6 @@
+/.DS_Store
+/.idea
+*.DS_Store
+/ansible/plays/*.retry
+/ost-infra/package-lock.json
+/ost-infra/node_modules

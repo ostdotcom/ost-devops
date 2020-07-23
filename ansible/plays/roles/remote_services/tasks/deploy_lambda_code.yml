@@ -1,0 +1,32 @@
+---
+
+- set_fact:
+    script_name: deploy_lambda_code.sh
+    config_file: "{{ workspace }}/{{ lambda_config_file_name }}"
+
+- name: Copy remote exec script
+  template:
+    src: "{{item}}.j2"
+    dest: "{{workspace}}/{{item}}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0700
+  with_items:
+    - "{{ script_name }}"
+
+- name: Copy Lambda configs file
+  copy:
+    src: "{{ local_config_file }}"
+    dest: "{{ config_file }}"
+
+- name: Run remote exec script
+  become_user: "{{ deploy_user }}"
+  shell: /bin/bash -l -c 'cd {{ workspace }} ; ./{{ script_name }} {{ lambda_function_arn }} {{ s3_bucket }} {{ s3_zip_file_path }} {{ current_path }} {{ config_file }} {{ region }}'
+  run_once: true
+  register: out
+- debug: var=out.stdout_lines
+
+- name: Remove Lambda config file
+  file:
+    path: "{{config_file}}"
+    state: absent

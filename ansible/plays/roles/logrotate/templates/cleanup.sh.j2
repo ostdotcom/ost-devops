@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+
+logrotate -vf /etc/logrotate.d/{{application}} -s {{ workspace }}/logrotate_status
+
+{{ workspace }}/jobs/{{sync_script_name}} -p {{platform}} -s {{sub_env}} -b {{ s3_bucket_logs }} -e {{ env }} -a {{ application }} -f {{logsDirPath}}

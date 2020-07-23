@@ -1,0 +1,15 @@
+[Unit]
+Description=Redis In-Memory Data Store
+After=network.target
+
+[Service]
+Type=notify
+ExecStart=/bin/bash -lc '{{redis.server_exec}} {{redis.conf_dir}}/{{redis.port}}.conf  --requirepass $REDIS_AUTH'
+ExecStop=/bin/bash -lc '{{redis.client_exec}} shutdown'
+ExecReload=/bin/kill -USR2 $MAINPID
+Restart=always
+RestartSec=1
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target

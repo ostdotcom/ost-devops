@@ -1,0 +1,63 @@
+#!/bin/bash
+start_time=`date +%s`
+RPM_VERSION=$1;
+APPLICATION=$2;
+ENV={{env}};
+
+base_directory={{app_base_directory}};
+workspace={{workspace}};
+profile_vars_dir={{profile_vars_dir}};
+
+app_base_dir=$base_directory/$APPLICATION;
+release_path=$app_base_dir/releases/$RPM_VERSION;
+
+# Include common functions
+. ./common_functions.sh
+
+if [[ -z $RPM_VERSION ]]; then
+    echo "Invalid RPM_VERSION!";
+    exit 1;
+fi
+
+valid_env=$(is_valid_env $ENV);
+if [[ $valid_env -eq 0 ]]; then
+    echo "Invalid ENV!";
+    exit 1;
+fi
+
+valid_app=$(is_valid_app $APPLICATION);
+if [[ $valid_app -eq 0 ]]; then
+    echo "Invalid APPLICATION!";
+    exit 1;
+fi
+
+temp_env_file=$workspace/${APPLICATION}_vars.sh;
+bash_env_file=$profile_vars_dir/${APPLICATION}_vars.sh;
+# Run DB migration
+if [[ $(db_migration_required $APPLICATION) -eq 1 ]]; then
+    echo "DB migration [START]"
+    export release_path=$release_path;
+    export ENV=$ENV;
+    export temp_env_file=$temp_env_file;
+    if [[ $(is_rails_app $APPLICATION) -eq 1 ]]; then
+        echo "Rails migration..."
+        /bin/bash -l -c 'source $temp_env_file ; cd $release_path ; rake db:create RAILS_ENV=$ENV ; rake db:migrate RAILS_ENV=$ENV';
+        if [[ $? != 0 ]]; then
+            source $bash_env_file;
+            printf "\nError in DB migration!\n" ; exit 1;
+        fi
+    elif [[ $(is_nodejs_app $APPLICATION) -eq 1 ]]; then
+        echo "NodeJs migration for ${APPLICATION}..."
+        /bin/bash -l -c 'source $temp_env_file ; cd $release_path ; node db/migrate.js';
+        if [[ $? != 0 ]]; then
+            source $bash_env_file;
+            printf "\nError in DB migration!\n" ; exit 1;
+        fi
+    fi
+    echo "DB migration [DONE]";
+fi
+source $bash_env_file;
+stop_time=`date +%s`
+time_taken=$[${stop_time}-${start_time}]
+
+echo "start time : ${start_time}  stop time : ${stop_time} time taken : ${time_taken} second"

@@ -1,0 +1,59 @@
+---
+
+
+- name: Copy common env file from local
+  copy:
+    src: "{{ local_config_path }}/{{ local_common_env_file }}"
+    dest: "{{ custom_env_files_dir }}/{{ common_env_file }}"
+
+- name: Create app shared log directory
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - {path: "{{ shared_path }}/log", mode: "0755"}
+
+- name: Copy ciphertext blob file
+  copy:
+    src: "{{ local_config_path }}/kms_cipher.enc"
+    dest: "{{ workspace }}/kms_{{env}}_{{application}}_cipher.enc"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0700
+
+- name: Copy set_env_vars file
+  copy:
+    src: files/set_env_vars.rb
+    dest: "{{ workspace }}/set_env_vars.rb"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0700
+
+- name: Include task from sendmail role it configures sendmail on server
+  include_role:
+    name: sendmail
+
+- name: Check if app specific file exists
+  stat:
+    path: "{{role_path}}/tasks/apps/{{application}}.yml"
+  run_once: yes
+  delegate_to: localhost
+  become: true
+  become_user: "{{ local_user }}"
+  register: app_specific_task
+
+- name: "App specific setup for {{ application }}"
+  include_tasks: "{{role_path}}/tasks/apps/{{application}}.yml"
+  when: app_specific_task.stat.exists
+
+- include_tasks: update_services.yml
+
+- include_tasks: setup_local_cache.yml
+  when: setup_local_cache is defined and setup_local_cache|bool
+
+
+

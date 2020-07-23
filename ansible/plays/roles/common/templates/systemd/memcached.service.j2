@@ -1,0 +1,15 @@
+[Unit]
+Description=Memcached
+Before=httpd.service
+After=network.target
+
+[Service]
+Type=simple
+EnvironmentFile=-/etc/sysconfig/{{application}}_memcached
+ExecStart=/usr/bin/memcached -u $USER -p $PORT -m $CACHESIZE -c $MAXCONN $OPTIONS
+Restart=always
+RestartSec=2
+KillSignal=SIGINT
+StartLimitIntervalSec=0
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,15 @@
+---
+
+- name: Setup monitoring using nagios
+  hosts: all
+  remote_user: centos
+  become: yes
+  become_method: sudo
+  any_errors_fatal: true
+
+
+  tasks:
+  - name: Include monitoring role
+    include_role:
+      name: monitoring
+

@@ -1,0 +1,17 @@
+1: Create subnet group for memcache that contains  the Saas private subnets
+
+2: We can use the default parameter group
+
+2: Select Domain name  -- Decide some naming convention
+   Engine Version Compatibility:1.4.34
+
+3: Select node type and number of nodes acording to the requirement
+   select the subnet group created in step 1
+   Select the security group
+
+4: Select maintainance window on a weekday 4 to 4:30 and create memcache
+
+
+5: Test connection to memcache by using the below command
+
+telnet ost-stag2-sand-mem.xsap5a.0001.use1.cache.amazonaws.com 11211

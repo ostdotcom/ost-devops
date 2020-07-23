@@ -1,0 +1,19 @@
+---
+
+- name: Update deploy-build scripts
+  template:
+    src: "{{item}}.j2"
+    dest: "{{workspace}}/{{item}}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0700
+  with_items:
+    - common_functions.sh
+    - deploy_build.sh
+    - upload_assets_to_s3.sh
+    - db_migrations.sh
+    - symlink.sh
+    - flush_cache.sh
+  when: server_type is defined
+
+

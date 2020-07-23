@@ -1,0 +1,32 @@
+---
+
+server_type: nodejs
+is_web: true
+asset_upload_required: true
+chain_id: 197
+
+
+
+nginx:
+  worker_processes: 4
+  passenger_max_pool_size: 4
+  passenger_min_instances: 2
+  listen_port: 8090
+  logs_dir: "{{ logs_dir }}/nginx"
+  pid_dir: "{{pid_dir}}"
+  rate_limit:
+    burst_size: 20
+    delay: 10
+    zone_size: 30m
+    rate: "10r/s"
+    limit_key: "$remote_addr"
+  realip_from:
+    - 10.49.0.0/20
+    - 10.49.64.0/20
+    - 10.50.0.0/20
+    - 10.50.64.0/20
+
+
+
+
+

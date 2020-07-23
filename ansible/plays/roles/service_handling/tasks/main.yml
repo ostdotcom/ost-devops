@@ -1,0 +1,25 @@
+---
+
+- name: "Copy service handling script for {{serviceAction}}"
+  copy:
+    src: "serviceHandling.sh"
+    dest: "{{ default_script_location }}/serviceHandling.sh"
+    mode: 0750
+
+- set_fact:
+    exec_cmd: "./serviceHandling.sh --app {{application}} --role {{role}} --action {{serviceAction}} --server-type {{server_type}} --name '{{serviceName}}' --force-restart '{{forceRestart}}' --stop-cron-file-path {{current_path}}/devops/exec/cronServices.js --current-path {{ current_path }}"
+  when: server_type is defined
+
+- name: "Run service handling script"
+  shell: sudo su - -c "cd {{ default_script_location }}; {{ exec_cmd }}"
+  register: out
+  when: server_type is defined
+
+- debug: var=out.stdout_lines
+  when: server_type is defined
+
+- name: Flush-cache
+  include_role:
+    name: remote_services
+    tasks_from: flush_cache
+  when: flushOptions is defined and flushOptions|length > 0

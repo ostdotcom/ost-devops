@@ -1,0 +1,39 @@
+---
+
+st_profile_type: company
+config_sub_dir: "{{ s3_configs_path }}/{{ application }}"
+js_package_manager: npm
+
+# DO NOT change these variables
+aws_st_profile: "{{st_profile_type}}-{{env}}-{{application}}"
+deploy_user: deployer
+deploy_group: devs
+deploy_home: "/home/deployer"
+workspace: "{{deploy_home}}/deploy"
+user_libs_dir: "{{deploy_home}}/libs"
+basic_auth_file: "{{user_libs_dir}}/.ba_password"
+dir_type: "/mnt/st-{{st_profile_type}}"
+app_base_directory: "{{ dir_type }}/apps"
+checkout_dir: "/mnt/tars"
+pid_dir: "/mnt/pids"
+logs_dir: "/mnt/logs"
+custom_env_files_dir: "/mnt/custom_vars"
+data_dir: /mnt/data
+profile_vars_dir: "/etc/profile.d"
+systemd_files_path: "/etc/systemd/system"
+initd_files_path: "/etc/init.d"
+default_script_location: "/home/centos/scripts"
+default_job_location: "/home/centos/job_defaults"
+app_env_file: "{{application}}_vars.sh"
+common_env_file: "{{application}}_common_vars.sh"
+local_common_env_file: "{{application}}_common_vars.sh"
+current_path: "{{ app_base_directory }}/{{ application }}/current"
+shared_path: "{{ app_base_directory }}/{{ application }}/shared"
+
+
+passenger_root: "{{deploy_home}}/.rvm/gems/ruby-2.5.3/gems/passenger-6.0.1"
+logrotate:
+  upload_cron_hour: "6"
+  upload_cron_minute: "5"
+
+pager_duty_tasks: "disk_space"

@@ -1,0 +1,71 @@
+{
+  "SecurityGroupIds_app": {
+    "default": {
+      "SecurityGroupIds": ["sg-0ca6cf86e0ef5f4a6","sg-02ff9bcd88bc3caea"]
+    },
+    "main": {
+      "SecurityGroupIds": ["sg-0cc8e95104d1b2392","sg-02ff9bcd88bc3caea"]
+    }
+  },
+
+  "SecurityGroupIds_cron": {
+    "default": {
+      "SecurityGroupIds": ["sg-0ca6cf86e0ef5f4a6","sg-02ff9bcd88bc3caea"]
+    },
+    "main": {
+      "SecurityGroupIds": ["sg-0cc8e95104d1b2392","sg-02ff9bcd88bc3caea"]
+    }
+  },
+
+  "SubnetId_1a": {
+    "default": {
+      "SubnetId": "subnet-00611e995930e1a95"
+    },
+    "main": {
+      "SubnetId": "subnet-0f2957f3fb79f82e1"
+    }
+  },
+
+  "SubnetId_1b": {
+    "default": {
+      "SubnetId": "subnet-06b578aad80106b4e"
+    },
+    "main": {
+      "SubnetId": "subnet-0e83f41304c0a71d9"
+    }
+  },
+
+  "IAMPolicyStatements_DDBToES": [
+    {
+      "Action": [
+        "dynamodb:DescribeStream",
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:ListStreams"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:dynamodb:{awsRegion}:{awsAccountId}:table/{envPrefix}_*"
+    },
+    {
+      "Action": [
+        "es:*"
+      ],
+      "Effect": "Allow",
+      "Resource": "*"
+    }
+  ],
+
+  "IAMAssumeRolePolicy_DDBToES": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "lambda.amazonaws.com"
+        },
+        "Action": "sts:AssumeRole"
+      }
+    ]
+  }
+
+}

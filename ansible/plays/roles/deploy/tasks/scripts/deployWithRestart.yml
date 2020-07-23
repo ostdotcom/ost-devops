@@ -1,0 +1,33 @@
+---
+
+- name: "Upload static assets to S3 for {{ application }}"
+  become_user: "{{ deploy_user }}"
+  shell: /bin/bash -l -c 'cd {{ workspace }} ;./upload_assets_to_s3.sh {{rpm_version}} {{application}}'
+#  run_once: true
+  register: out
+  when: asset_upload_required is defined and asset_upload_required|bool
+- debug: var=out.stdout_lines
+  when: asset_upload_required is defined and asset_upload_required|bool
+
+- name: "Run DB migration"
+  become_user: "{{ deploy_user }}"
+  shell: /bin/bash -l -c 'cd {{ workspace }} ; ./db_migrations.sh {{rpm_version}} {{application}}'
+  run_once: true
+  register: out
+
+- debug: var=out.stdout_lines
+
+
+- name: "Symlink files and directories for {{ application }}"
+  become_user: "{{ deploy_user }}"
+  shell: /bin/bash -l -c 'cd {{workspace}} ; ./symlink.sh {{rpm_version}} {{application}}'
+  register: out
+
+- debug: var=out.stdout_lines
+
+- name: "services {{serviceAction}}"
+  include_role:
+    name: service_handling
+
+
+

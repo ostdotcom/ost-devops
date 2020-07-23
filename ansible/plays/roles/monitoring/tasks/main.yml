@@ -1,0 +1,8 @@
+---
+- set_fact:
+    nagios_home: "/usr/local/nagios/etc"
+    plugin_home: "/usr/local/nagios/libexec"
+    httpd_home: "/etc/httpd/conf"
+    root_user: "root"
+
+- include_tasks: "{{ monitoring_task }}.yml"

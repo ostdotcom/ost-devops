@@ -1,0 +1,27 @@
+1: Select name according to convention
+   Add description
+   Engine compatibility version - 3.2.6
+   Change port to 9000
+   parameter group - default.redis3.2.cluster.on
+
+2: Select node type according to use case
+   Change replica to 0 or as requirement
+   Enable Multi-AZ with Auto-Failover
+
+3:  Select the private subnet group of saasApi
+
+4: Select correct Security Group
+
+5: Enable encryption at rest and transit
+   Enable Redis auth
+   update redis auth token
+
+6 : Backup Retention Period:The number of days for which automated backups are retained.1 day(s)
+
+7: Maintenance Window:The weekly time range (in UTC) during which system maintenance can occur.thu:06:30-thu:07:30
+
+8:Backup Window:The daily time range during which automated backups are initiated if automated backups are enabled.04:30-05:30
+
+9: test connection to redis from saas app
+
+    redis-cli -h endpoint -p port(9000) -a auth

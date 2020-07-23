@@ -1,0 +1,42 @@
+---
+- name: Set fact vars
+  set_fact:
+    conf_file: "{{ deploy_home }}/libs/nginx/conf/{{application}}.conf"
+    temp_conf_file: "{{ deploy_home }}/libs/nginx/conf/{{application}}-temp.conf"
+
+- name: Create app shared log directory
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - {path: "{{ nginx.logs_dir }}", mode: "0750"}
+  when: role is defined and role == 'app' and nginx is defined
+
+- name: Create generic basic auth file
+  become_user: "{{ deploy_user }}"
+  shell: htpasswd -bc {{ basic_auth_file }} {{basic_auth_user}} {{basic_auth_password}}
+  when: basic_auth_user is defined and basic_auth_user|length > 0 and basic_auth_password is defined and basic_auth_password|length > 0
+
+# service config files
+- name: Create temp NGINX conf file for app
+  template:
+    src: "configs/nginx-{{ application }}.conf.j2"
+    dest: "{{ temp_conf_file }}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+
+- name: Test nginx conf
+  command: "{{ deploy_home }}/libs/nginx/sbin/nginx -t -c {{ temp_conf_file }}"
+  become_user: "{{deploy_user}}"
+
+- name: Update NGINX conf file for app
+  copy:
+    src: "{{ temp_conf_file }}"
+    dest: "{{ conf_file }}"
+    remote_src: yes
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"

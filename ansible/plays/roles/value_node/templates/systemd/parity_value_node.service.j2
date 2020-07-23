@@ -1,0 +1,24 @@
+[Unit]
+Description=parity_vn - Parity node for value chain
+After=remote-fs.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=deployer
+Type=simple
+Restart=always
+RestartSec=1
+{% if env == 'production' and sub_env == 'main' %}
+
+ExecStart=/bin/bash -l -c 'parity --mode=active --chain=ethereum --base-path={{ vc_node_dir }}/node_{{node_id}} --db-path={{ vc_node_dir }}/node_{{node_id}}/db --ipc-path={{ vc_node_dir }}/node_{{node_id}}/parity.ipc --ipc-apis=web3,net,eth,rpc,personal  --jsonrpc-apis=web3,net,eth,rpc,personal  --jsonrpc-port={{value_node_rpcport}}   --ws-apis=web3,net,eth,rpc,personal   --ws-port={{value_node_wsport}} --port={{value_node_sync_port}} --jsonrpc-hosts=$(hostname -i) --jsonrpc-interface=$(hostname -I) --ws-interface=all --ws-hosts=$(hostname -i) --ws-origins=all --ws-max-connections={{ws_max_connections}} --no-warp --pruning archive --geth 1>> {{chain_logs_dir}}/node_{{node_id}}.log 2>&1'
+LimitNOFILE=50000
+{% else %}
+
+ExecStart=/bin/bash -l -c 'parity --mode=active --chain=kovan --base-path={{ vc_node_dir }}/node_{{node_id}} --db-path={{ vc_node_dir }}/node_{{node_id}}/db --ipc-path={{ vc_node_dir }}/node_{{node_id}}/parity.ipc --ipc-apis=web3,net,eth,rpc,personal  --jsonrpc-apis=web3,net,eth,rpc,personal  --jsonrpc-port={{value_node_rpcport}}   --ws-apis=web3,net,eth,rpc,personal   --ws-port={{value_node_wsport}} --port={{value_node_sync_port}} --jsonrpc-hosts=$(hostname -i) --jsonrpc-interface=$(hostname -I) --ws-interface=all --ws-hosts=$(hostname -i) --ws-origins=all --ws-max-connections={{ws_max_connections}} --no-warp --pruning archive --geth  1>> {{chain_logs_dir}}/node_{{node_id}}.log 2>&1'
+LimitNOFILE=50000
+{% endif %}
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target

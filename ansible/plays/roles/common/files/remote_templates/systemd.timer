@@ -1,0 +1,11 @@
+[Unit]
+Description=Run cron job timer
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+Persistent=false
+OnCalendar={{job['timer']}}
+Unit={{job['target_name']}}.service
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,25 @@
+---
+
+- set_fact:
+    file_pattern: "hosts_{{pattern}},service_{{pattern}}"
+
+- name: Ansible delete file wildcard
+  find:
+    paths: "{{nagios_home}}/configs/"
+    patterns: "{{file_pattern}}"
+  register: files_to_delete
+
+- name: Remove hosts and services file
+  file:
+    path: "{{item.path}}"
+    state: absent
+  with_items:
+    - "{{files_to_delete.files}}"
+
+- name: Restart  nagios server
+  systemd:
+    name: nagios
+    state: "{{service_action}}"
+    enabled: yes
+  when: service_action is defined
+

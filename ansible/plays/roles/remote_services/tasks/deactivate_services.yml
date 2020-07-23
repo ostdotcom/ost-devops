@@ -1,0 +1,27 @@
+---
+- set_fact:
+    script_name: "systemd_services.py"
+    jobs_file: "{{ default_job_location }}/jobs.json"
+
+- name: "Copy {{ remote_task }} script: {{ script_name }}"
+  copy:
+    src: "files/{{ script_name }}"
+    dest: "{{ default_script_location }}/{{ script_name }}"
+    mode: 0755
+
+- copy: content="{{jobs|to_json}}" dest="{{ jobs_file }}"
+  when: jobs is defined
+
+- set_fact:
+    exec_cmd: "sudo ./{{ script_name }} --action deactivate {{'--jobs-file ' + jobs_file if jobs is defined else '' }} --role {{role}} --server-type {{server_type}} --app {{application}} "
+
+- name: "Run command => {{ exec_cmd }}"
+  shell: |
+        cd {{ default_script_location }};
+        {{ exec_cmd }}
+
+- name: Remove data input file
+  file:
+    state: absent
+    path: "{{ jobs_file }}"
+  when: jobs is  defined

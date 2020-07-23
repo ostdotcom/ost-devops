@@ -1,0 +1,37 @@
+{
+  "SecurityGroupIds_app": {
+    "default": {
+      "SecurityGroupIds": ["sg-0e5e0381cba05cbe0","sg-02ff9bcd88bc3caea"]
+    },
+    "main": {
+      "SecurityGroupIds": ["sg-0ed1664139d09081e","sg-02ff9bcd88bc3caea"]
+    }
+  },
+
+  "SecurityGroupIds_cron": {
+    "default": {
+      "SecurityGroupIds": ["sg-0e5e0381cba05cbe0","sg-02ff9bcd88bc3caea"]
+    },
+    "main": {
+      "SecurityGroupIds": ["sg-0ed1664139d09081e","sg-02ff9bcd88bc3caea"]
+    }
+  },
+
+  "SubnetId_1a": {
+    "default": {
+      "SubnetId": "subnet-0b61cc3c74a7f9ed1"
+    },
+    "main": {
+      "SubnetId": "subnet-0ca23884d335b0754"
+    }
+  },
+
+  "SubnetId_1b": {
+    "default": {
+      "SubnetId": "subnet-055e9e3b5385b9805"
+    },
+    "main": {
+      "SubnetId": "subnet-06f80ed2d0ed73d57"
+    }
+  }
+}

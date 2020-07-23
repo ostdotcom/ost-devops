@@ -1,0 +1,82 @@
+---
+
+- name: copy host cfg files
+  copy:
+    src: "{{item}}"
+    dest: "{{nagios_home}}/configs"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  with_items:
+    - "{{host_app_config_file}}"
+    - "{{service_app_config_file}}"
+  when:   host_app_config_file is defined and service_app_config_file is defined
+
+- name: copy host cfg files
+  copy:
+    src: "{{item}}"
+    dest: "{{nagios_home}}/configs"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  with_items:
+  - "{{host_cron_config_file}}"
+  - "{{service_cron_config_file}}"
+  when:   host_cron_config_file is defined and service_cron_config_file is defined
+
+- name: Backup nagios default file
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: yes
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  with_items:
+    - {src: "{{nagios_home}}/defaults/default.cfg" , dest: "{{nagios_home}}/defaults/default_bkp.cfg"}
+    - {src: "{{nagios_home}}/defaults/commands.cfg" , dest: "{{nagios_home}}/defaults/commands_bkp.cfg"}
+
+- name: Copy nagios default files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+  with_items:
+  - {src: "{{commands_config_file}}" , dest: "{{nagios_home}}/defaults/commands.cfg"}
+  - {src: "{{default_config_file}}" , dest: "{{nagios_home}}/defaults/default.cfg"}
+  when: commands_config_file is defined and default_config_file is defined
+
+- name: Check nagios config files validity
+  shell: /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+  ignore_errors: yes
+  register: result
+
+- name: move bkp command file to original as exec precheck has failed
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    remote_src: yes
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+  with_items:
+    - {src: "{{nagios_home}}/defaults/commands_bkp.cfg" , dest: "{{nagios_home}}/defaults/commands.cfg"}
+    - {src: "{{nagios_home}}/defaults/default_bkp.cfg" , dest: "{{nagios_home}}/defaults/default.cfg"}
+  when: result.rc != 0
+
+- name: Clean tmp commmands file
+  file:
+    state: absent
+    path: "{{nagios_home}}/defaults/{{ item }}"
+  with_items:
+    - commands_bkp.cfg
+    - defaults_bkp.cfg
+
+- name: CHecking if nagios start will fail
+  shell: echo "your command file is incorrect"
+  failed_when: result.rc != 0
+
+- name: Restart  nagios server
+  systemd:
+    name: nagios
+    state: "{{service_action}}"
+    enabled: yes
+  when: service_action is defined

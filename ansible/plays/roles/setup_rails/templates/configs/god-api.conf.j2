@@ -1,0 +1,3 @@
+ENV['RAILS_ENV'] = '{{ env }}'
+God.pid = '{{ god.pid_dir }}/god-{{ application }}.pid'
+God.load '{{ god.conf_dir }}/{{application}}/*.god'

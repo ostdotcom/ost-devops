@@ -1,0 +1,28 @@
+---
+
+- set_fact:
+    sync_script_name: "S3_Sync_Files.sh"
+
+- name: "run logrotate  "
+  shell: logrotate -vf /etc/logrotate.conf
+  become: yes
+  ignore_errors: yes
+
+- name: " Ensures {{ workspace }}/jobs dir exists"
+  file: path={{ workspace }}/jobs state=directory
+
+- name: Setup  S3 sync  script
+  copy:
+    src: "{{role_path}}/../logrotate/templates/{{sync_script_name}}.j2"
+    dest: "{{ workspace }}/jobs/{{sync_script_name}}"
+    group: "{{deploy_group}}"
+    mode: 0755
+    owner: "{{deploy_user}}"
+
+- name: run update logs to S3
+  shell: su - deployer -lc "{{ workspace }}/jobs/{{sync_script_name}} -p {{platform}} -s {{sub_env}} -b {{ s3_bucket_logs }} -e {{ env }} -a {{ application }} -f  {{ logsDirPath }}"
+  become: yes
+  register: debug
+
+
+- debug: var=debug.stdout_lines

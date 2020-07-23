@@ -1,0 +1,6 @@
+---
+
+# defaults file for setup_utility_chain
+uc_geth_node_dir: "{{ dir_type }}/{{chain_node_type}}/{{application}}"
+chain_logs_dir: "{{ logs_dir }}/{{chain_node_type}}"
+temp_env_file_with_path: "{{ uc_geth_node_dir }}/temp_env_vars.sh"

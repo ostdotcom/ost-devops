@@ -1,0 +1,24 @@
+---
+
+- name: Install memcached
+  yum:
+    name: "memcached"
+    state: present
+
+- name: Update memcached params
+  template:
+    src: "configs/memcached.j2"
+    dest: "/etc/sysconfig/{{application}}_memcached"
+    mode: 644
+
+- name: Update memcached service
+  template:
+    src: "systemd/memcached.service.j2"
+    dest: "/etc/systemd/system/{{application}}_memcached.service"
+    mode: 644
+
+- name: Start memcached
+  systemd:
+    name: "{{application}}_memcached"
+    state: started
+    enabled: yes

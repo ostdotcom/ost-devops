@@ -1,0 +1,64 @@
+{
+  "SecurityGroupIds_privateNode": {
+    "default": {
+      "SecurityGroupIds": ["sg-0b88dbe76df65cf31","sg-02ff9bcd88bc3caea"]
+    },
+    "main": {
+      "SecurityGroupIds": ["sg-0d921c6616305937a","sg-02ff9bcd88bc3caea"]
+    }
+  },
+
+  "SecurityGroupIds_publicNode": {
+    "default": {
+      "SecurityGroupIds": ["sg-099597ad74142da69","sg-02ff9bcd88bc3caea"]
+    },
+    "main": {
+      "SecurityGroupIds": ["sg-08bdc347edf04f690","sg-02ff9bcd88bc3caea"]
+    }
+  },
+
+  "SecurityGroupIds_sealerNode": {
+    "default": {
+      "SecurityGroupIds": ["sg-0a0d08d0012a67da7","sg-02ff9bcd88bc3caea"]
+    },
+    "main": {
+      "SecurityGroupIds": ["sg-0b74d32e24732308e","sg-02ff9bcd88bc3caea"]
+    }
+  },
+
+  "SubnetId_1a": {
+    "default": {
+      "SubnetId": "subnet-00611e995930e1a95"
+    },
+    "main": {
+      "SubnetId": "subnet-0f2957f3fb79f82e1"
+    }
+  },
+
+  "SubnetId_1b": {
+    "default": {
+      "SubnetId": "subnet-06b578aad80106b4e"
+    },
+    "main": {
+      "SubnetId": "subnet-0e83f41304c0a71d9"
+    }
+  },
+
+  "SubnetId_public_1a": {
+    "default": {
+      "SubnetId": "subnet-0dfefad49bca8ccd4"
+    },
+    "main": {
+      "SubnetId": "subnet-0c7ce02b3cac909c3"
+    }
+  },
+
+  "SubnetId_public_1b": {
+    "default": {
+      "SubnetId": "subnet-05c5316aaa9223c1b"
+    },
+    "main": {
+      "SubnetId": "subnet-0ce9bb0223cfe65dc"
+    }
+  }
+}

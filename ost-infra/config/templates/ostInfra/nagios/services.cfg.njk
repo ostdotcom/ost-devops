@@ -1,0 +1,10 @@
+{% for value in services %}
+define service {
+
+    use                     local-service
+    hostgroup_name          {{namePrefix}}
+    service_description     {{value.serviceName}}
+    check_command           {{value.serviceName}}{{value.args.service}}
+}
+
+{%- endfor %}

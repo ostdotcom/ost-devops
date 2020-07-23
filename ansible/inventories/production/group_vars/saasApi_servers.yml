@@ -1,0 +1,36 @@
+---
+
+server_type: nodejs
+is_web: false
+
+flush_memcache: True
+flush_redis: True
+
+
+
+nginx:
+  worker_processes: 5
+  listen_port: 8085
+  logs_dir: "{{ logs_dir }}/nginx"
+  pid_dir: "{{pid_dir}}"
+  rate_limit:
+    burst_size: 50
+    delay: 30
+    zone_size: 30m
+    rate: "300r/s"
+    limit_key: "$remote_addr"
+  realip_from:
+    - 10.49.0.0/20
+    - 10.49.64.0/20
+    - 10.50.0.0/20
+    - 10.50.64.0/20
+  es:
+    listen_port: 8087
+    domain: es.stagingost.com
+    basic_auth_file: /home/deployer/libs/nginx/conf/.es_htpasswd
+    proxy_domain: vpc-saas-api-staging-seds4tuzkvah7asvpmuo4vpj7u.us-east-1.es.amazonaws.com
+
+
+pagerduty:
+  cron_time_in_minute: "*/5"
+  geth_block_check_time_interval: "300"

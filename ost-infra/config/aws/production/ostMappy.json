@@ -1,0 +1,28 @@
+{
+  "SecurityGroupIds_app": {
+    "default": {
+      "SecurityGroupIds": ["sg-054db5a59f567ea0c","sg-02ff9bcd88bc3caea"]
+    },
+    "main": {
+      "SecurityGroupIds": [""]
+    }
+  },
+
+  "SubnetId_public_1a": {
+    "default": {
+      "SubnetId": "subnet-0dfefad49bca8ccd4"
+    },
+    "main": {
+      "SubnetId": ""
+    }
+  },
+
+  "SubnetId_public_1b": {
+    "default": {
+      "SubnetId": "subnet-05c5316aaa9223c1b"
+    },
+    "main": {
+      "SubnetId": ""
+    }
+  }
+}

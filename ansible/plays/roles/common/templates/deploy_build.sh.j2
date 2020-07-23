@@ -1,0 +1,249 @@
+#!/bin/bash
+start_time=`date +%s`
+
+workspace={{workspace}};
+base_directory={{app_base_directory}};
+checkout_dir={{checkout_dir}};
+st_profile_type={{st_profile_type}}
+status=0
+user={{deploy_user}};
+group={{deploy_group}};
+export ENV="{{env}}";
+
+RPM_VERSION=$1;
+APPLICATION=$2;
+S3_BUILD_DIR=$3;
+S3_CONFIG_DIR=$4;
+JS_PACKAGE_MANAGER=$5;
+AWS_REGION=$6;
+
+# Include common functions
+. ./common_functions.sh
+
+if [[ -z $RPM_VERSION ]]; then
+    echo "[Error] Invalid RPM_VERSION!";
+    exit 1;
+fi
+
+valid_env=$(is_valid_env $ENV);
+if [[ $valid_env -eq 0 ]]; then
+    echo "[Error] Invalid ENV!";
+    exit 1;
+fi
+
+valid_app=$(is_valid_app $APPLICATION);
+if [[ $valid_app -eq 0 ]]; then
+    echo "[Error] Invalid APPLICATION!";
+    exit 1;
+fi
+
+app_base_dir=$base_directory/$APPLICATION;
+export release_path=$app_base_dir/releases/$RPM_VERSION;
+shared_path=$app_base_dir/shared;
+tar_to_be_installed=$checkout_dir/$RPM_VERSION.tar.gz;
+tar_url="$S3_BUILD_DIR/simpletoken-$APPLICATION-$RPM_VERSION.tar.gz";
+
+echo "app_base_dir: $app_base_dir";
+echo "release_path: $release_path";
+echo "tar_to_be_installed: $tar_to_be_installed";
+
+
+function download_configs(){
+    local src=$1
+    local destFileWithPath=$2
+    local salt=$3
+
+    aws s3 cp ${S3_CONFIG_DIR}/${src}.enc ${workspace}/${src}.enc;
+    if [[ $? != 0 ]]; then
+        echo "[Error] downloading block scanner config file: ${src}!" ;
+        exit 1;
+    fi
+
+    openssl aes-256-cbc -d -in ${workspace}/${src}.enc -out ${workspace}/${src} -pass pass:$salt -md md5;
+    if [[ $? != 0 ]]; then
+        echo "[Error] decrypt block scanner config file: ${src}!";
+        rm -f ${workspace}/${src}.enc;
+        exit 1;
+    fi
+    mv -f ${workspace}/${src} ${destFileWithPath}
+    rm -f ${workspace}/${src}.enc
+ }
+
+# Download buld and extract it
+echo "Download and Extract build [START]";
+if [[ ! -f $tar_to_be_installed ]]; then
+
+    aws s3 cp $tar_url $tar_to_be_installed ;
+    gzip -t $tar_to_be_installed;
+    if [[ $? != 0 ]]; then
+        rm -f $tar_to_be_installed;
+        echo "[Error] Downloaded tar is not valid" ;
+        exit 1;
+    fi
+fi
+echo "Download and Extract build [DONE]";
+
+# Download env config vars
+echo "Download ENV config file [START]";
+env_config_file="${APPLICATION}_${RPM_VERSION}.json";
+enc_env_config_file="${APPLICATION}_${RPM_VERSION}.json.enc";
+aws s3 cp $S3_CONFIG_DIR/$enc_env_config_file $workspace/$enc_env_config_file ;
+if [[ $? != 0 ]]; then
+    echo "[Error] downloading envconfig file!" ;
+    exit 1;
+fi
+
+# Decrypt config file
+kms_blob_file=$workspace/kms_${ENV}_${APPLICATION}_cipher.enc;
+plainText=`aws kms decrypt --ciphertext-blob fileb://$kms_blob_file  --region $AWS_REGION --output text --query Plaintext`;
+if [[ -z $plainText ]]; then
+    echo "[Error] decrypt ciphertext blob!!!";
+    exit 1;
+fi
+encodedText=`echo -n $plainText | base64`
+
+openssl aes-256-cbc -d -in $workspace/$enc_env_config_file -out $workspace/$env_config_file -pass pass:$encodedText -md md5;
+if [[ $? != 0 ]]; then
+    echo "[Error] Error decrypt config file!!!";
+    rm -f $workspace/$enc_env_config_file;
+    exit 1;
+fi
+
+rm -f $workspace/$enc_env_config_file;
+chmod 600 $workspace/$env_config_file;
+
+echo "Download ENV config file [DONE]";
+
+# Create release folder structure
+echo "Dir structure changes [START]";
+mkdir -p $release_path;
+mkdir -p $app_base_dir/"shared/log";
+mkdir -p $app_base_dir/"shared/tmp";
+tar -xzvf $tar_to_be_installed -C $release_path >> /dev/null;
+aws s3 ls ${S3_CONFIG_DIR}/customConfigs_${RPM_VERSION}
+if [[ $? == 0 ]]
+then
+    aws s3 cp --recursive  ${S3_CONFIG_DIR}/customConfigs_${RPM_VERSION} ${release_path}/
+    export destination="${release_path}"
+
+   for enc_file in `ls  ${destination}/*.enc`
+   do
+     cd ${destination};
+     decrypted_file=`echo "$enc_file" | sed -e 's/\.[^.]*$//'`
+     openssl aes-256-cbc -d -in ${enc_file} -out ${decrypted_file} -pass pass:$encodedText -md md5 ;
+     if [[ $? -ne 0 ]]
+     then
+        echo "decrypt   failed ";
+        exit 1
+     fi
+     rm -f  ${enc_file}
+   done
+fi
+
+# Update other configs
+if [[ ${APPLICATION} == 'ostAnalytics' ]]; then
+    # Download Origin blockscanner config
+    config_file="origin_blockscanner_${APPLICATION}_${RPM_VERSION}.json"
+    download_configs $config_file "${release_path}/origin_block_scanner_config.json" $encodedText
+
+    # Download Aux blockscanner config
+    config_file="aux_blockscanner_${APPLICATION}_${RPM_VERSION}.json"
+    download_configs $config_file "${release_path}/aux_block_scanner_config.json" $encodedText
+
+    # Download jdbc config
+    config_file="jdbc_${APPLICATION}_${RPM_VERSION}.properties"
+    download_configs $config_file "${release_path}/pdi/configs/${ENV}/simple-jndi/jdbc.properties" $encodedText
+fi
+
+chown -R $user:$group $release_path;
+chown -R $user:$group "${app_base_dir}/shared"
+echo "Dir structure changes [DONE]";
+
+
+# Bundle install
+if [[ $(is_nodejs_app $APPLICATION) -eq 1 ]]; then
+    echo "JS Package install [START]";
+
+    cd $release_path ;
+    if [[ $(is_package_manager_npm $JS_PACKAGE_MANAGER) -eq 1 ]]; then
+        echo "************* NPM *************";
+        node_ver=`node -v`
+        npm cache clean --force;
+        if [[ ${node_ver} == "v10.16.3" ]]; then
+            rm -rf node_modules
+        fi
+        if [[ -f $release_path/package-lock.json ]]; then
+          echo "************* running npm ci *************";
+          npm ci
+        else
+          echo "************* running npm install  *************";
+          npm install --production;
+        fi
+
+        status=$(( $status + $? ))
+    else
+        echo "************* YARN *************";
+        yarn;
+        status=$(( $status + $? ))
+    fi
+    echo "JS Package install [DONE]";
+elif [[ $(is_rails_app $APPLICATION) -eq 1 ]]; then
+    echo "Bundle install [START]";
+    export release_path=$release_path;
+    /bin/bash -l -c 'cd $release_path ; gem install bundler --no-document  ;status=$(( $status + $? )); bundle install --without development test ;status=$(( $status + $? ))';
+    echo "Bundle install [DONE]";
+fi
+
+if [[ $status -ne 0 ]]
+then
+  echo "[Error] either bundle install or npm install failed ";
+  exit 1
+fi
+
+gem install json;
+
+if [[ $(asset_precompile_required $APPLICATION) -eq 1 ]]; then
+    echo "Assets pre-compile [START]";
+    if [[ $(is_rails_app $APPLICATION) -eq 1 ]]; then
+      /bin/bash -lc 'cd $release_path ;rm -rf public/js-css ; rake assets:precompile RAILS_ENV=${ENV};';
+    else
+      /bin/bash -lc 'cd $release_path ;rm -rf builtAssets ; ./node_modules/.bin/connect-assets -gz';
+    fi
+
+    if [[ $? -ne 0 ]]; then
+         printf "[Error] in asset precompile!" ;
+         exit 1;
+    fi
+    echo "Assets pre-compile [DONE]";
+else
+    echo "************* Assets pre-compile not required *************";
+fi
+
+# Generate ENV vars && temp update
+echo "Generate shell ENV config files [START]";
+temp_env_file=$workspace/${APPLICATION}_vars.sh;
+if [[ $(is_config_app ${APPLICATION} ) -eq 1  ]]; then
+  mv $workspace/$env_config_file $release_path/configuration.json
+else
+  touch $temp_env_file;
+  chmod 600 $temp_env_file;
+  echo '' > $temp_env_file;
+
+  which_ruby=$(which ruby);
+  $which_ruby $workspace/set_env_vars.rb $workspace/$env_config_file $temp_env_file;
+  if [ $? != 0 ]; then
+      rm -f $workspace/$env_config_file;
+      rm -f $temp_env_file;
+      printf "[Error] setting env vars!" ;
+      exit 1;
+  fi
+  echo "$APPLICATION ************************************** rm -f $workspace/$env_config_file;" ;
+  rm -f $workspace/$env_config_file;
+fi
+echo "Generate shell ENV config files [DONE]";
+stop_time=`date +%s`
+time_taken=$[${stop_time}-${start_time}]
+
+echo "start time : ${start_time}  stop time : ${stop_time} time taken : ${time_taken} second"
+
+

@@ -1,0 +1,28 @@
+---
+- set_fact:
+    service_file: "{{role_path}}/templates/systemd/app/{{application}}.service.j2"
+    application_service_file: "{{role_path}}/templates/systemd/app/nginx-{{application}}.service.j2"
+# For timers and crons
+- name: Create systemd file cron jobs
+  copy:
+    src: "{{role_path}}/files/remote_templates/systemd.service"
+    dest: "{{ default_job_location }}/{{ application }}_systemd.service"
+
+- name: Create systemd timer file for cron jobs
+  copy:
+    src: "{{role_path}}/files/remote_templates/systemd.timer"
+    dest: "{{ default_job_location }}/systemd.timer"
+
+
+- name: "Create systemd file for app from {{ service_file }}"
+  template:
+    src: "{{service_file}}"
+    dest: "{{ default_job_location }}/{{ application }}.service"
+  when:  service_file is  is_file
+
+  # systemd service files
+- name: "Create systemd file for nginx proxy service from {{ application_service_file }}"
+  template:
+    src: "{{application_service_file}}"
+    dest: "{{ default_job_location }}/nginx-{{ application }}.service"
+  when: application_service_file is  is_file

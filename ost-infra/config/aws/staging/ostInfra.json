@@ -1,0 +1,19 @@
+{
+  "SecurityGroupIds_cron": {
+    "main": {
+      "SecurityGroupIds": ["sg-0965f462070126872"]
+    }
+  },
+
+  "SubnetId_1a": {
+    "main": {
+      "SubnetId": "subnet-069f4bce6d379f44e"
+    }
+  },
+
+  "SubnetId_1b": {
+    "main": {
+      "SubnetId": "subnet-0f0b7c6e31aebfbbe"
+    }
+  }
+}

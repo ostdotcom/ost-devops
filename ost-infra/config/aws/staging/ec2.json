@@ -1,0 +1,68 @@
+{
+  "ec2": {
+    "ImageId": "ami-0af78e13f18ba58ce",
+    "InstanceType": "",
+    "KeyName": "",
+    "MinCount": 1,
+    "MaxCount": 1,
+    "DisableApiTermination": true,
+    "BlockDeviceMappings": [],
+    "IamInstanceProfile": {},
+    "TagSpecifications": []
+  },
+
+  "KeyName_default": {
+    "KeyName": "ost-kit-sand-staging"
+  },
+
+  "KeyName_main": {
+    "KeyName": "ost-kit-sand-staging"
+  },
+
+  "rootVolumeMap": {
+    "DeviceName": "/dev/sda1",
+    "Ebs": {"VolumeSize": "15", "VolumeType": "gp2", "SnapshotId": "snap-092d4ba290c57e2ba", "DeleteOnTermination": true,"Encrypted":true}
+  },
+
+  "dataVolumeMap": {
+    "DeviceName": "/dev/sdb",
+    "Ebs": {"VolumeSize": "", "VolumeType": "", "SnapshotId": "snap-0882592e03bdd5ad6", "DeleteOnTermination": true,"Encrypted":true}
+  },
+
+  "nameTag": {
+    "Key": "Name",
+    "Value": ""
+  },
+
+  "purposeTag": {
+    "Key": "Purpose",
+    "Value": ""
+  },
+
+  "appNameTag": {
+    "Key": "AppName",
+    "Value": ""
+  },
+
+  "appEnvTag": {
+    "Key": "AppEnv",
+    "Value": ""
+  },
+
+  "envTag": {
+    "Key": "env",
+    "Value": ""
+  },
+
+  "subEnvTag": {
+    "Key": "SubEnv",
+    "Value": ""
+  },
+
+  "groupTag": {
+    "Key": "GroupName",
+    "Value": ""
+  },
+
+  "ec2InstanceProfileRoleARN": "arn:aws:iam::{awsAccountId}:instance-profile/ec2_instance_profile"
+}

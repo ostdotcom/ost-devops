@@ -1,0 +1,5 @@
+---
+# tasks file for onetimer
+
+- name: "Run task: {{ task_name }}"
+  include_tasks: "{{ task_name }}.yml"

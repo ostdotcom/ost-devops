@@ -1,0 +1,101 @@
+Generate csr for ssl certificate:
+----------------------------------
+
+Address to use:
+
+OST.com Inc.
+Addr1 - 33 Irving Place
+Addr2 - Suite 4008
+City - New York
+State - New York
+Zip code - 10003
+
+
+Generate self signed certificate for staging:
+---------------------------------------------
+
+1) openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout self.stagingsimpletoken.org.key -out self.stagingsimpletoken.org.crt
+
+Country Name (2 letter code) [XX]:HK
+State or Province Name (full name) []:Hong Kong Special Administrative Region
+Locality Name (eg, city) [Default City]:Hong Kong
+Organization Name (eg, company) [Default Company Ltd]:The Simple Token Foundation Limited
+Organizational Unit Name (eg, section) []:Simple Token
+Common Name (eg, your name or your server's hostname) []:*.stagingsimpletoken.org
+
+
+2) Create CSR and KEY for ost.com:
+
+openssl req -new -newkey rsa:2048 -nodes -keyout ost.com.key -out ost.com.csr
+
+Country Name (2 letter code) [XX]:HK
+State or Province Name (full name) []:Hong Kong Special Administrative Region
+Locality Name (eg, city) [Default City]:Hong Kong
+Organization Name (eg, company) [Default Company Ltd]:OST.COM LTD
+Organizational Unit Name (eg, section) []:Simple Token
+Common Name (eg, your name or your server's hostname) []:*.ost.com
+
+3) For certificate chain, download bundle cert file (gdig2_bundle.crt) from https://certs.godaddy.com/repository
+
+4) Install certificate to ELB:
+	Go to EC2 console -> Load Balancers -> Select Loadbalancer
+	Select Listeners
+	Select HTTPS listener
+	Click on View/edit certificates
+	Click on Add Certificate
+	Select domain
+	Click on Import Certificate
+	Select ACM
+	(Once you added Key, Cert and Cert chain) Click Import
+	Then click Add
+
+-------------------------------------------------------------------
+
+5) Create CSR and KEY for stagingost.com:
+
+openssl req -new -newkey rsa:2048 -nodes -keyout stagingost.com.key -out stagingost.com.csr
+
+Country Name (2 letter code) [XX]:HK
+State or Province Name (full name) []:Hong Kong Special Administrative Region
+Locality Name (eg, city) [Default City]:Hong Kong
+Organization Name (eg, company) [Default Company Ltd]:OST.com Inc.
+Organizational Unit Name (eg, section) []:OST
+Common Name (eg, your name or your server's hostname) []:*.stagingost.com
+
+-------------------------------------------------------------------
+
+
+6) Generate CSR with an alternate name
+--------------------------------------
+
+openssl req -new -sha256 -nodes -out stagingost.com.csr -newkey rsa:2048 -keyout stagingost.com.key -config <(
+cat <<-EOF
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+req_extensions = req_ext
+distinguished_name = dn
+
+[ dn ]
+C=US
+ST=New York
+L=33 Irving Place, NY
+O=OST
+OU=OST
+CN = *.stagingost.com
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = stagingost.com
+EOF
+)
+
+-------------------------------------------------------------------
+
+7) Get certificate pin from CSR
+openssl req -in stagingost.com.csr -pubkey -noout | openssl rsa -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64
+
+-------------------------------------------------------------------

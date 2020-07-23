@@ -1,0 +1,59 @@
+
+1:  Create a VPC if not already created by providing valid CIDR according to the requirement of no of IPs.
+
+2: Create custom IGW if required
+
+3: Create the below subnets
+Choose VPC,availability zone and CIDR  carefully depending upon the no of Ips and resources you plan on putting in the subnet.
+
+    ost-sand-foundation-private-1a
+    ost-sand-saas-private-1b
+    ost-sand-view-private-1b
+    ost-sand-public-1b
+    ost-sand-saas-private-1a
+    ost-sand-services-private-1a
+    ost-sand-public-1a
+    ost-sand-view-private-1a
+    ost-sand-foundation-private-1b
+    ost-sand-services-private-1b
+
+4: Create a NAT table that will transmit  the internet traffic after  changing the source ip.
+   so that the instances in private subnet can communicate with internet .
+
+5: Make 2 route tables one for private routing and one for public .
+   Associate your subnets  with the route table
+   Define routes for your associated subnets
+
+6: Create the below security groups add inbound ports and protocols based on the current staging stack
+    ost-sand: Web App
+    ost-sand: Api App
+    ost-main: ELB
+    ost-sand: Utility Geth
+    ost-sand: Redis Server
+    ost-sand: Memcached Server
+    ost-sand: Saas App
+    ost-sand: RabbitMQ
+    ost-sand: Value Geth
+    ost-sand: Default
+    ost-sand: Ost View App
+    ost-sand: OSTView Utility Geth
+    ost-sand: ES Server
+    ost-sand: Lambda
+    ost-sand: Utility Geth Public
+    ost-sand: DB Server
+    ost-sand: Utility Geth Sealer
+
+Extras
+
+         ost-sand: Pentaho App
+
+
+  7 : Create IAM user for app with appropriate permission for example
+
+      saasApi-DynamoDB-Policy
+
+  8 Create Role (staging_2_saasApi_DDB_to_ES) for Lambda
+     Add following policies to the role:
+        - DyanamoDb Acccess--staging_2_saasApi_ddb_stream
+        - Es Access--staging_2_saasApi_es
+        - VPCAccess - AWSLambdaVPCAccessExecutionRole

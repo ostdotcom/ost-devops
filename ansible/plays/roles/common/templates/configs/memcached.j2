@@ -1,0 +1,14 @@
+PORT="11211"
+USER="memcached"
+
+{% if memcached is defined and memcached.maxconn is defined  %}
+MAXCONN="{{memcached.maxconn}}"
+{% else %}
+MAXCONN="1024"
+{% endif %}
+{% if memcached is defined and memcached.cachesize is defined  %}
+CACHESIZE="{{memcached.cachesize}}"
+{% else %}
+CACHESIZE="64"
+{% endif %}
+OPTIONS=""

@@ -1,0 +1,14 @@
+---
+
+- name: restart services
+  hosts: "{{apply_on_hosts if apply_on_hosts != None else 'all' }}"
+  remote_user: "{{remoteUser}}"
+  become: yes
+  become_method: sudo
+  any_errors_fatal: true
+  gather_facts: no
+
+  tasks:
+  - name: run restart services
+    include_role:
+      name: service_handling

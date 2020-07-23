@@ -1,0 +1,4 @@
+---
+# defaults file for roles/common
+nagios_url: " https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.4.3.tar.gz?__hstc=118811158.a80a3078edfd80d1a2f832dfb7f78545.1550648506409.1552645882630.1555071862725.4&__hssc=118811158.1.1555071862725&__hsfp=2428541752#_ga=2.208421778.1446505804.1555071861-1287624067.1550648505"
+

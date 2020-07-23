@@ -1,0 +1,5 @@
+deploy_user: "{{deploy_user}}"
+deploy_group: "{{deploy_group}}"
+peer_script_name: "getpeers.sh"
+workspace: "{{workspace}}"
+cron_minute: "30"

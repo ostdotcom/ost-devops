@@ -1,0 +1,44 @@
+---
+
+
+- name: install latest version of geth
+  shell: |
+    export geth_version='{{ geth_version }}';
+    cd /opt/go-ethereum;
+    git pull --rebase;
+    git checkout v${geth_version};
+    make all;
+    rm -f /usr/bin/geth
+    ln -s /opt/go-ethereum/build/bin/geth /usr/bin/geth;
+
+- name: Include common role
+  include_role:
+    name: common
+
+- name: Create value chain geth dir structure
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ deploy_user }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+  - {path: "{{ vc_node_dir }}", mode: "0750", group: "{{ deploy_group }}"}
+  - {path: "{{ chain_logs_dir }}", mode: "0755", group: "{{ deploy_group }}"}
+  - {path: "{{ vc_node_dir }}/keystore", mode: "0750", group: "{{ deploy_user }}"}
+  - {path: "{{ vc_node_dir }}/keystore/*", mode: "0600", group: "{{ deploy_user }}"}
+
+- name: Create temp env file
+  file:
+    path: "{{ temp_env_file_with_path }}"
+    state: touch
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_group }}"
+    mode: 0700
+
+- include_role:
+    name: getpeers
+
+- include_role:
+    name: logrotate

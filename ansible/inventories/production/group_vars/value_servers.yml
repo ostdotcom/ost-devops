@@ -1,0 +1,26 @@
+---
+
+node_type: value
+chain_node_type: 'geth'
+
+value_node_sync_port: 30303
+value_node_rpcport: 8545
+value_node_wsport: 8546
+
+
+#### Instance vars ####
+
+is_geth_value_node: true
+geth_node_id:
+
+# Local operation vars
+local_file_path: remote_files
+tmp_file_loc: "{{ local_file_path }}/tmp"
+local_user: bala
+local_temp_env_file: temp_env_vars.sh
+
+pagerduty:
+  cron_time_in_minute: "*/5"
+  chain_block_check_time_interval: 300
+  chain_tx_pool_threshold: 100
+  chain_open_files_threshold: 50

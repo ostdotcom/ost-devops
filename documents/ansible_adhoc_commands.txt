@@ -1,0 +1,5 @@
+1) Restart servers:
+ansible -i ~/bala_folder_dump/workspace/SimpleTokenDevops/st_foundation/ansible/inventories/staging_hosts web_servers -u centos -b -m shell -a "systemctl restart web"
+
+# Copy files from server to local
+ansible -i 10.50.118.11, -b -m fetch -a "src=/home/deployer/ostView_hack_attempt.log dest=~/ flat=yes" all

@@ -1,0 +1,15 @@
+logrotate_conf_dir: "/etc/logrotate.d/"
+workspace: "{{workspace}}"
+deploy_user: "{{deploy_user}}"
+deploy_group: "{{deploy_group}}"
+
+env: "{{ env }}"
+application: "{{ application }}" 
+cron_minute: "{{logrotate.upload_cron_minute}}"
+cron_hour: "{{logrotate.upload_cron_hour}}"
+app_shared_log: "{{ shared_path }}/log"
+sync_script_name: "S3_Sync_Files.sh"
+nginx_exist.stat.exists: False
+logrotate_scripts:
+    - name: "{{ application }}"
+      path: "{{ app_shared_log }}/*.log"

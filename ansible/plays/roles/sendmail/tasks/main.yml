@@ -1,0 +1,58 @@
+---
+
+
+- name: Register vars
+  set_fact:
+    from_email_addr: "{{sendmail_email_addr}}"
+    from_email_addr_pw: "{{sendmail_email_addr_pw}}"
+
+- fail: msg="Email address not set!"
+  when: from_email_addr|length == 0 or from_email_addr_pw|length == 0
+
+- name: Install the sendmail libs
+  yum:
+    name: ['mailx', 'cyrus-sasl-plain', 'sendmail-cf', 'sendmail']
+    state: present
+  when: ansible_distribution == 'CentOS'
+
+- name: Install the sendmail libs
+  apt:
+    name: ['mailutils', 'sendmail-cf', 'sendmail']
+    state: present
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Update SMTP creds
+  shell: |
+    mkdir -m 700 /etc/mail/authinfo
+    touch /etc/mail/authinfo/gmail-idpass
+    echo 'AuthInfo: "U:root" "I:{{from_email_addr}}" "P:{{from_email_addr_pw}}"' > /etc/mail/authinfo/gmail-idpass
+    makemap hash /etc/mail/authinfo/gmail-idpass < /etc/mail/authinfo/gmail-idpass
+    rm -f /etc/mail/authinfo/gmail-idpass
+
+- name: Add gmail smtp options
+  blockinfile:
+    path: /etc/mail/sendmail.mc
+
+    marker: 'dnl #{mark} Ansible managed block'
+    insertbefore: 'MAILER\(smtp\)dnl'
+    block: |
+      define(`SMART_HOST',`[smtp.gmail.com]')dnl
+      define(`RELAY_MAILER_ARGS', `TCP $h 587')dnl
+      define(`ESMTP_MAILER_ARGS', `TCP $h 587')dnl
+      define(`confAUTH_OPTIONS', `A p')dnl
+      TRUST_AUTH_MECH(`EXTERNAL DIGEST-MD5 CRAM-MD5 LOGIN PLAIN')dnl
+      define(`confAUTH_MECHANISMS', `EXTERNAL GSSAPI DIGEST-MD5 CRAM-MD5 LOGIN PLAIN')dnl
+      FEATURE(`authinfo',`hash -o /etc/mail/authinfo/gmail-idpass.db')dnl
+      define(`confMAX_DAEMON_CHILDREN', `25')dnl
+      define(`confCONNECTION_RATE_THROTTLE', `3')dnl
+
+- name: Running make
+  shell: |
+    make -C /etc/mail
+
+- name: Make sure a service is running
+  systemd:
+    state: restarted
+    name: sendmail
+    enabled: yes
+    daemon_reload: yes

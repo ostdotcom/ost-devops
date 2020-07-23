@@ -1,0 +1,43 @@
+---
+
+  - name: rabbitmq_clustering | copy erlang cookie
+    template: src=erlang.cookie.j2 dest=/var/lib/rabbitmq/.erlang.cookie owner=rabbitmq group=rabbitmq mode=0400
+    register: cookie
+
+
+  - name: Start Rabbitmq_server
+    systemd:
+      name: rabbitmq-server
+      daemon_reload: yes
+      state: restarted
+      enabled: yes
+    when: cookie.changed
+  - set_fact:
+      proceed: "{{ansible_hostname != hostvars['localhost'].rabbitmq_master}}"
+
+  - name: rabbitmq_clustering | stopping rabbitmq app
+    command: rabbitmqctl stop_app
+    when:  proceed
+
+
+  - name: rabbitmq_clustering | resetting rabbitmq app
+    command: rabbitmqctl reset
+    when: proceed
+
+  - name: rabbitmq_clustering | joining rabbitmq cluster
+    shell: rabbitmqctl join_cluster rabbit@"{{hostvars['localhost'].rabbitmq_master}}"
+    register: cluster_joined
+    when: proceed
+
+  - name: rabbitmq_clustering | starting rabbitmq app
+    command: rabbitmqctl start_app
+    when: proceed
+
+  - name: rabbitmq_ha_config | setting up ha on queue(s)
+    rabbitmq_policy:
+      name: "ha-all"
+      pattern: .*
+      tags:
+        ha-mode: all
+        ha-sync-mode: automatic
+    run_once: true

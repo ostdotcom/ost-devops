@@ -1,0 +1,28 @@
+---
+- set_fact:
+    script_name: "systemd_services.py"
+    app_data_file: "{{ default_job_location }}/appData.json"
+    workspace_crons_dir: "{{role_path}}/templates/workspace_crons/{{application}}"
+
+- name: "Copy {{ remote_task }} script: {{ script_name }}"
+  copy:
+    src: "files/{{ script_name }}"
+    dest: "{{ default_script_location }}/{{ script_name }}"
+    mode: 0755
+
+- template:
+    src: "app_data.json.j2"
+    dest: "{{ app_data_file }}"
+
+- set_fact:
+    exec_cmd: "cd {{ default_script_location }} ; sudo ./{{ script_name }} --action remove --app-data-file {{app_data_file}} "
+
+- name: "Run command => {{ exec_cmd }}"
+  shell: "{{ exec_cmd }}"
+  register: out
+- debug: var=out.stdout_lines
+
+- name: Remove data input file
+  file:
+    state: absent
+    path: "{{ app_data_file }}"

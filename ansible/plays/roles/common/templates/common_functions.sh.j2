@@ -1,0 +1,124 @@
+#!/bin/bash
+
+function is_valid_env() {
+	local envr=$1;
+	if [[ ($envr == "production" || $envr == "staging") ]]; then
+        echo 1;
+    else
+        echo 0;
+	fi
+}
+
+function is_valid_app() {
+	local app=$1;
+	if [[ ($app == 'api' ||$app == 'mappyApi' || $app == 'mappyWeb'|| $app == 'web' || $app == 'cmsApi' || $app == 'cmsWeb' || $app == 'saasApi' || $app == 'ostView' || $app == 'ostWeb' || $app == 'ostOrg' || $app == 'ostAnalytics' || $app == 'ostInfra' ) ]]; then
+        echo 1;
+	else
+		echo 0;
+	fi
+}
+
+function is_config_app() {
+	app=$1;
+	if [[  $app == "ostView"  ]]; then
+		echo 1;
+	else
+		echo 0;
+	fi
+}
+function is_static() {
+	app=$1;
+	if [[ $app == "mappyWeb" ]]; then
+		echo 1;
+	else
+		echo 0;
+	fi
+}
+
+function has_typeScript() {
+	echo 0;
+}
+function isWebPackBuildRequired() {
+	echo 0;
+}
+function is_valid_app_type() {
+	local app_type=$1;
+	if [[ ($app_type == 'app' || $app_type == 'job' || $app_type == 'script') ]]; then
+		echo 1;
+	else
+		echo 0;
+	fi
+}
+
+function is_nodejs_app() {
+	local app=$1;
+	if [[ $app == 'saasApi' || $app == 'mappyWeb' || $app == 'ostView' || $app == 'ostAnalytics' || $app == 'ostInfra' ]]; then
+		echo 1;
+	else
+		echo 0;
+	fi
+}
+
+function is_rails_app() {
+	local app=$1;
+	if [[ $app == 'web' ||$app == 'cmsApi' || $app == 'cmsWeb' || $app == 'mappyApi'|| $app == 'api' || $app == 'ostWeb' || $app == 'ostOrg' ]]; then
+		echo 1;
+	else
+		echo 0;
+	fi
+}
+
+function is_web_type_app() {
+	local app=$1;
+	if [[ $app == 'web' || $app == 'ostWeb' || $app == 'cmsWeb' || $app == 'ostOrg' ]]; then
+		echo 1;
+	else
+		echo 0;
+	fi
+}
+
+function db_migration_required() {
+	local app=$1;
+	if [[ $app == 'api' || $app == 'mappyApi' || $app == 'cmsApi' ]]; then
+		echo 1;
+	else
+		echo 0;
+	fi
+}
+
+function has_sub_environment() {
+	local app=$1;
+	if [[ $app == 'api' || $app == 'web' || $app == 'saasApi' || $app == 'ostView' ]]; then
+		echo 1;
+	else
+		echo 0;
+	fi
+}
+
+function asset_upload_required() {
+	local app=$1;
+	if [[ $app == 'web' || $app == 'cmsWeb'|| $app == 'ostWeb' || $app == 'ostView' || $app == 'ostOrg' ]]; then
+		echo 1;
+	else
+		echo 0;
+	fi
+}
+function asset_precompile_required() {
+	local app=$1;
+	if [[ $app == 'web' || $app == 'cmsWeb'|| $app == 'ostWeb' || $app == 'ostView' || $app == 'ostOrg' ]]; then
+		echo 1;
+	else
+		echo 0;
+	fi
+}
+function is_package_manager_npm() {
+	local pkg_mngr=$1;
+	if [[ $pkg_mngr == 'npm' ]]; then
+		echo 1;
+	else
+		echo 0;
+	fi
+}
+
+
+

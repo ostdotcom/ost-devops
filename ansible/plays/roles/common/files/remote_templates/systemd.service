@@ -1,0 +1,22 @@
+[Unit]
+Description= {{job['name']}}
+After=remote-fs.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=deployer
+Type=simple
+
+{% if  job['timer'] is not defined  %}
+Restart=always
+RestartSec=2
+StartLimitIntervalSec=0
+{% endif %}
+
+ExecStart=/bin/bash -lc 'cd {{job['common_data']['exec_dir_location']}} ; {{job['template_params']['exec_path']}} {{job['template_params']['exec_file_path']}} {{job['template_params']['extra_vars']}} >>{{job['common_data']['shared_path']}}/log/{{job['target_name']}}.log 2>&1'
+
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target

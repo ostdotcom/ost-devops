@@ -1,0 +1,47 @@
+---
+
+- name: Setup  S3 sync  script
+  template:
+    src: "{{sync_script_name}}.j2"
+    dest: "{{ workspace }}/jobs/{{sync_script_name}}"
+    group: "{{deploy_group}}"
+    mode: 0755
+    owner: "{{deploy_user}}"
+
+- name:  Install logrotate package if not installed
+  yum:
+    name: logrotate
+    state: present
+  when: ansible_distribution == 'CentOS'
+
+- sefcontext:
+    target: '{{ item }}(/.*)?'
+    setype: var_log_t
+    state: present
+    reload: True
+  ignore_errors: yes
+  with_items:
+  - "{{ logsDirPath.split(',') }}"
+  when: ansible_distribution == 'CentOS'
+
+- name: Restore SELinux labels on filesystem tree
+  command: "restorecon -vR {{ item }}"
+  ignore_errors: yes
+  with_items:
+  - "{{ logsDirPath.split(',') }}"
+
+- name: Setup  logrotate.d scripts and cleanup scripts
+  template:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+    mode: "{{item.mode}}"
+  with_items:
+  - {src: logrotate.d.j2 ,dest: "{{ logrotate_conf_dir }}{{ application }}" ,mode: "0644"}
+  - {src: cleanup.sh.j2 ,dest: "{{ workspace }}/jobs/cleanup.sh",mode: "0755"}
+
+- cron:
+    name: "upload {{ application }}  logs to S3"
+    minute: "{{cron_minute}}"
+    hour: "{{cron_hour}}"
+    job: "su - deployer -lc \"{{ workspace }}/jobs/{{sync_script_name}} -p {{platform}} -s {{sub_env}} -b {{ s3_bucket_logs }} -e {{ env }} -a {{ application }} -f {{logsDirPath}} > /dev/null\""
+

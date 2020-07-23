@@ -1,0 +1,26 @@
+---
+
+server_type: nodejs
+is_web: true
+is_static: true
+
+nginx:
+  worker_processes: 4
+  passenger_max_pool_size: 4
+  passenger_min_instances: 2
+  listen_port: 8092
+  logs_dir: "{{ logs_dir }}/nginx"
+  pid_dir: "{{pid_dir}}"
+  rate_limit:
+    zone_size: 30m
+    rate: "5r/s"
+    limit_key: "$remote_addr"
+  realip_from:
+    - 10.49.0.0/20
+    - 10.49.64.0/20
+    - 10.50.0.0/20
+    - 10.50.64.0/20
+
+logrotate:
+  upload_cron_hour: "6"
+  upload_cron_minute: "15"

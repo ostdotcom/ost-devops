@@ -1,0 +1,43 @@
+
+###############################################################################
+# COMMANDS.CFG - SAMPLE COMMAND DEFINITIONS FOR NAGIOS 4.4.3
+#
+#
+# NOTES: This config file provides you with some example command definitions
+#        that you can reference in host, service, and contact definitions.
+#
+#        You don't need to keep commands in a separate file from your other
+#        object definitions.  This has been done just to make things easier to
+#        understand.
+#
+###############################################################################
+
+
+
+################################################################################
+#
+# SAMPLE NOTIFICATION COMMANDS
+#
+# These are some example notification commands.  They may or may not work on
+# your system without modification.  As an example, some systems will require
+# you to use "/usr/bin/mailx" instead of "/usr/bin/mail" in the commands below.
+#
+################################################################################
+
+
+
+
+{% for key,value in services %}
+define command {
+
+    command_name    {{value.serviceName}}
+    command_line    $USER1$/check_nrpe  -H $HOSTADDRESS$ -p {{nrpePort}}  -c {{value.serviceName}} -n  -a {{value.args.command}}
+}
+
+{%- endfor %}
+
+
+define command {
+    command_name  trigger_error_log_entries
+    command_line  /bin/bash -lc "{{ remoteAppRoot }}/executables/infra.js --lambda-invoke-create-error-log --env $_HOSTENV$ --raw-data 'HOSTNAME=$HOSTNAME$,HOSTSTATE=$HOSTSTATE$,LASTHOSTSTATE=$LASTHOSTSTATE$,HOSTSTATETYPE=$HOSTSTATETYPE$,SERVICEDISPLAYNAME=$SERVICEDISPLAYNAME$,SERVICESTATE=$SERVICESTATE$,SERVICESTATETYPE=$SERVICESTATETYPE$,SERVICEATTEMPT=$SERVICEATTEMPT$,LASTSERVICEOK=$LASTSERVICEOK$,SERVICECHECKCOMMAND=$SERVICECHECKCOMMAND$' >> {{ appLogsDir }}/lambda_invoke_create_log.log"
+}

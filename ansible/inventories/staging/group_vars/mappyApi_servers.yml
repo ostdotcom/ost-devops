@@ -1,0 +1,30 @@
+---
+
+server_type: rails
+is_web: false
+gemset_wrappers: "{{deploy_home}}/.rvm/gems/ruby-2.5.3@demo_server_gemset/wrappers"
+
+
+# Nginx-passenger configuration paramaters
+nginx:
+  worker_processes: 4
+  passenger_max_pool_size: 4
+  passenger_min_instances: 2
+  listen_port: 8091
+  logs_dir: "{{ logs_dir }}/nginx"
+  pid_dir: "{{pid_dir}}"
+  rate_limit:
+    zone_size: 30m
+    rate: "25r/s"
+    burst_size: 20
+    delay: 10
+    limit_key: "$http_x_forwarded_for"
+  realip_from:
+    - 121.141.0.0/20
+    - 121.141.64.0/20
+    - 121.142.0.0/20
+    - 121.142.64.0/20
+
+
+
+

@@ -1,0 +1,39 @@
+---
+
+- name: "Setup redis server"
+  shell: |
+    cd /opt/redis-4.0.12;
+    REDIS_PORT={{redis.port}} \
+    REDIS_CONFIG_FILE={{redis.conf_dir}}/{{redis.port}}.conf \
+    REDIS_LOG_FILE={{redis.logs_dir}}/{{redis.port}}.log \
+    REDIS_DATA_DIR={{redis.data_dir}}/{{redis.port}} \
+    REDIS_EXECUTABLE="{{redis.server_exec}}" ./utils/install_server.sh;
+    sleep 10;
+    systemctl stop  redis_{{redis.port}};
+    systemctl disable  redis_{{redis.port}};
+    /etc/init.d/redis_{{redis.port}} stop ;
+  register: out
+
+- debug: var=out.stdout_lines
+
+- name: Copy redis config file
+  template:
+    src: "configs/redis.conf.j2"
+    dest: "{{redis.conf_dir}}/{{redis.port}}.conf"
+
+- name: Clean init.d service
+  file:
+    state: absent
+    path: "/etc/init.d/redis_{{redis.port}}"
+
+- name: Copy service init script
+  template:
+    src: "systemd/redis.conf.j2"
+    dest: "/etc/systemd/system/redis_{{redis.port}}.service"
+
+- name: Start redis server
+  systemd:
+    name: "redis_{{ redis.port }}"
+    state: restarted
+    enabled: yes
+

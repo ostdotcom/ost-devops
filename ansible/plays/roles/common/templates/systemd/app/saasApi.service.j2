@@ -1,0 +1,24 @@
+[Unit]
+Description=PM2 process manager for saasApi
+Documentation=https://pm2.keymetrics.io/
+After=network.target
+
+[Service]
+Type=forking
+User=deployer
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+Environment=PM2_HOME={{shared_path}}/pm2
+PIDFile={{shared_path}}/pm2/pm2.pid
+
+
+Restart=always
+RestartSec=1
+ExecStart=/bin/bash -l -c 'pm2 start {{current_path}}/bin/www.js --hp {{shared_path}}/pm2 -o /dev/null -e /dev/null  --name {{application}} --wait-ready --listen-timeout 5000 -i max --kill-timeout 30000 --env production --log {{shared_path}}/log/{{application}}.log '
+ExecReload=/bin/bash -l -c 'pm2 reload {{application}} --hp {{shared_path}}/pm2 '
+ExecStop=/bin/bash -l -c 'pm2 stop {{application}} --hp {{shared_path}}/pm2'
+
+
+[Install]
+WantedBy=multi-user.target

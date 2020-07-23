@@ -1,0 +1,4 @@
+---
+
+sub_env: sandbox
+config_sub_dir: "{{ s3_configs_path }}/{{ sub_env }}/{{ application }}"

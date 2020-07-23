@@ -1,0 +1,55 @@
+---
+
+
+- name: copy nrpe cfg files
+  copy:
+    src: "{{nrpe_config_file}}"
+    dest: "{{nagios_home}}/nrpe.cfg"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0755
+
+- name: copy custom plugins
+  template:
+    src: "{{item.src}}"
+    dest: "{{plugin_home}}/{{item.path}}"
+    owner: "{{root_user}}"
+    group: "{{ deploy_user }}"
+    mode: 0755
+  with_filetree: '../files/scripts/'
+  when: item.state == 'file'
+
+
+- name: Stop  nrpe  service
+  systemd:
+    name: nrpe
+    state: stopped
+    enabled: no
+  ignore_errors: yes
+
+- name: remove default nrpe service
+  file:
+    state: absent
+    path: /usr/lib/systemd/system/nrpe.service
+
+
+- name: copy nrpe cfg files
+  copy:
+    src: "{{role_path}}/files/nrpe.service"
+    dest: "/etc/systemd/system/nrpe.service"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0755
+
+- name: Start  nrpe  service
+  systemd:
+    name: nrpe
+    state: started
+    enabled: yes
+- name: Check nrpe +nagios plugins
+  shell: |
+    {{plugin_home}}/check_nrpe -H 127.0.0.1 -p {{nrpePort}} -n
+  become: true
+
+
+

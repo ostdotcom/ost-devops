@@ -1,0 +1,25 @@
+{
+  "createFunction": {
+    "Code": {
+      "S3Bucket": "",
+      "S3Key": ""
+    },
+    "FunctionName": "",
+    "Handler": "index.handler",
+    "Role": "",
+    "Runtime": "nodejs8.10",
+    "Description": "",
+    "Environment": {
+      "Variables": {
+
+      }
+    },
+    "MemorySize": 128,
+    "Publish": true,
+    "Timeout": 3,
+    "VpcConfig": {
+      "SecurityGroupIds": [],
+      "SubnetIds": []
+    }
+  }
+}

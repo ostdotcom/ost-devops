@@ -1,0 +1,42 @@
+
+
+###############################################################################
+#
+# HOST DEFINITION
+#
+###############################################################################
+# Define a host for the local machine
+{%set hostgroup = '' %}
+{% for item in ips %}
+
+define host {
+
+    use                     linux-server
+    host_name               {{namePrefix}}_{{item}}
+#    alias                   {{namePrefix}}
+    address                 {{item}}
+    _ENV                    {{env}}
+    display_name            {{namePrefix}}_{{item}}
+}
+{% if hostgroup|length <1 %}
+  {%  set hostgroup =  namePrefix + '_' + item %}
+{% else %}
+  {%  set hostgroup = hostgroup + ',' + namePrefix +'_'+ item %}
+{% endif %}
+{%- endfor %}
+
+
+###############################################################################
+#
+# HOST GROUP DEFINITION
+#
+###############################################################################
+
+# Define an optional hostgroup for Linux machines
+
+define hostgroup {
+
+    hostgroup_name          {{namePrefix}}
+#    alias                   {{namePrefix}}
+    members                 {{hostgroup}}
+}

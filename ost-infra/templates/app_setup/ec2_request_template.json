@@ -1,0 +1,24 @@
+{
+  "app": {
+    "subEnv": "{{subEnv}}",
+    "app": "{{app}}",
+    "name": "{{appName}}",
+    "availabilityZone": "{{availZone}}",
+    "appType": "app",
+    "volumeType": "gp2",
+    "volumeSize": "{{volumeSize}}",
+    "nodeType": "{{nodeType}}",
+    "instanceType": "{{instanceType}}"
+  },
+  "cron": {
+    "subEnv": "{{subEnv}}",
+    "app": "{{app}}",
+    "name": "{{appName}}",
+    "nodeType": "{{nodeType}}",
+    "availabilityZone": "{{availZone}}",
+    "appType": "cron",
+    "volumeType": "gp2",
+    "volumeSize": "{{volumeSize}}",
+    "instanceType": "{{instanceType}}"
+  }
+}

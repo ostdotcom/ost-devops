@@ -1,0 +1,60 @@
+1) Go to RDS console
+2) Create subnet groups for RDS
+3) Create parameter group
+	Make sure to adjust the following values
+		long_query_time = 0.1
+		slow_query_log = 1
+		max_connections (Required in case of staging where instance size is small)
+
+4:  Select mysql engine
+
+5: use case production - MySql
+
+6 Db engine version - Engine
+                      MySQL 5.6.40
+
+7 Select db class according to use case currently for staging it is db.t2.small for stag2
+
+8 Multi AZ
+  No
+
+9 Disk general purpose ssd
+  500gb for stag2
+
+10 Give DB instance name
+   Master Db username
+   Master db password
+
+11  Select VPC
+    Select Subnet created in step 2
+    Public accessiblity - No
+
+12 Select the parameter created in step 3
+   Let the option group be default
+
+13 IAM DB Authentication Enabled
+   No
+
+14 Encryption enabled
+   Yes
+   KMS key
+   aws/rds
+
+15 Automated backups
+   Enabled (5 Days)
+   Backup window
+   01:00-01:30 UTC (GMT)
+
+16 Performance Insights enabled
+   No
+
+17 Maintenance details
+   Auto minor version upgrade
+   Yes
+   Maintenance window
+   mon:03:00-mon:03:30 UTC (GMT)
+
+18 Create one user for application after the instance is up .
+
+   CREATE USER 'ost_stag_user'@'%' IDENTIFIED BY 'pF5!hV%MTk&4UVK72^Apjp3y';
+   GRANT ALL ON `%`.* TO ost_stag_user@`%`;

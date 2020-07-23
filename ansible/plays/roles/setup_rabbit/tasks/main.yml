@@ -1,0 +1,43 @@
+---
+
+- include: rabbit_server.yml
+
+- name: Check if the node is part of the cluster or not
+  shell: rabbitmqctl cluster_status |grep running_nodes|awk -F"@" '{print NF-1}'
+  register: node_count
+
+- set_fact:
+    rabbitmq_master: "{{ hostvars[item].ansible_hostname }}"
+  when: hostvars[item].node_count.stdout|int > 1
+  with_items: "{{ groups['all'] }}"
+  run_once: yes
+  delegate_to: localhost
+  delegate_facts: True
+
+
+- set_fact:
+    rabbitmq_master: "{{ hostvars[item]['ansible_hostname'] }}"
+  when: hostvars[item].node_count.stdout|int  == 1  and (hostvars['localhost'].rabbitmq_master is not defined)
+  with_items: "{{ groups['all'] }}"
+  run_once: yes
+  delegate_to: localhost
+  delegate_facts: True
+
+
+- include: rabbitmq_clustering.yml
+  when: node_count.stdout|int == 1
+
+- include: create_users.yml
+
+- include_role:
+    name: common
+    tasks_from: update_nginx_conf
+  when: nginx is defined and role is defined and role == 'app'
+
+
+
+
+
+
+
+

@@ -1,0 +1,42 @@
+---
+
+- name: Setup server
+  hosts: "{{apply_on_hosts}}"
+  remote_user: "{{remoteUser}}"
+  become: yes
+  become_method: sudo
+  any_errors_fatal: true
+
+
+  tasks:
+  - name: Include common setup
+    include_role:
+      name: common
+
+  - name: Setup Qa server
+    include_role:
+      name: setup_qa
+    when: qa_setup is defined and qa_setup|bool
+
+  - name: Include rabbit setup
+    include_role:
+      name: setup_rabbit
+    when: server_type is defined and server_type ==  "rabbit"
+
+  - name: Include rails setup
+    include_role:
+      name: setup_rails
+    when: server_type is defined and server_type == "rails"
+
+  - name: Setup Redis server
+    include_role:
+      name: setup_redis
+
+  - name: Include nodejs setup
+    include_role:
+      name: setup_nodejs
+    when: server_type is defined and server_type == "nodejs"
+
+  - name: Include task from update logrotate
+    include_role:
+      name: logrotate

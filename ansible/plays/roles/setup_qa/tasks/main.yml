@@ -1,0 +1,26 @@
+---
+# tasks file for roles/setup_redis
+
+
+
+- name: Include deployment setup from common role
+  include_role:
+    name: common
+    tasks_from: deploy_setup
+
+- name: Copy google repo file
+  template:
+    src: "repos/google.repo"
+    dest: "/etc/yum.repos.d/google.repo"
+
+- name: Install packages required by qa team
+  yum:
+    name: ['java-1.8.0-openjdk','java-1.8.0-openjdk-devel', 'maven' ,'google-chrome-stable-76.0.3809.87']
+    state: present
+  when: qa_setup is defined and qa_setup|bool
+
+- name: copy slave.jar from s3 bucket
+  become_user: centos
+  shell: |
+    aws s3 cp s3://{{ devops_s3_bucket }}/jenkins/slave.jar . ;
+

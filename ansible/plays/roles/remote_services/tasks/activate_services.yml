@@ -1,0 +1,67 @@
+---
+
+- set_fact:
+    script_name: "systemd_services.py"
+    app_data_file: "{{ default_job_location }}/appData.json"
+    workspace_crons_dir: "{{role_path}}/templates/workspace_crons/{{application}}"
+
+- name: "Copy source service file templates"
+  include_role:
+      name: common
+      tasks_from: update_services
+
+- name: "Update {{application}} scripts"
+  template:
+    src: "{{item}}"
+    dest: "{{workspace}}/jobs/{{ item | basename | regex_replace('.j2','') }}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0755
+  with_fileglob: "{{workspace_crons_dir}}/*"
+  when: workspace_crons_dir is is_dir
+
+- name: "Copy {{ remote_task }} script: {{ script_name }}"
+  copy:
+    src: "files/{{ script_name }}"
+    dest: "{{ default_script_location }}/{{ script_name }}"
+    mode: 0755
+
+- template:
+    src: "app_data.json.j2"
+    dest: "{{ app_data_file }}"
+
+
+
+- set_fact:
+    exec_cmd: "sudo ./{{ script_name }} --action activate --app-data-file {{app_data_file}}"
+
+- name: "Run command => {{ exec_cmd }}"
+  shell: |
+        cd {{ default_script_location }};
+        {{ exec_cmd }}
+  register: out
+- debug: var=out.stdout_lines
+
+
+
+
+
+- name: Remove data input file
+  file:
+    state: absent
+    path: "{{ app_data_file }}"
+
+- name: "Services action: {{ serviceAction }}"
+  include_role:
+    name: service_handling
+  register: out
+  when: serviceAction is defined and serviceAction|length > 0
+
+#TODO:: Temp fix for saasApi memory leak
+- name: "Temporary restart {{ application }} app "
+  cron:
+    name: "Temp fix for memory leak"
+    minute: "01"
+    hour: "04"
+    job: "sudo systemctl restart {{ application }}"
+  when: application == "saasApi" and env == "staging"

@@ -1,0 +1,21 @@
+---
+
+server_type: rabbit
+
+nginx:
+  worker_processes: 5
+  listen_port: 8021
+  app_port: 15672
+  logs_dir: "{{ logs_dir }}/nginx"
+  pid_dir: "{{pid_dir}}"
+  rate_limit:
+    zone_size: 30m
+    rate: "50r/s"
+    burst_size: 20
+    delay: 10
+    limit_key: "$http_x_forwarded_for"
+  realip_from:
+    - 10.49.0.0/20
+    - 10.49.64.0/20
+    - 10.50.0.0/20
+    - 10.50.64.0/20

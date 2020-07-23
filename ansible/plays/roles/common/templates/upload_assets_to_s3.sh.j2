@@ -1,0 +1,57 @@
+#!/bin/bash
+start_time=`date +%s`
+RPM_VERSION=$1;
+export APPLICATION=$2;
+export ENV={{env}};
+workspace={{workspace}};
+
+base_directory={{app_base_directory}};
+app_base_dir=$base_directory/$APPLICATION;
+release_path=$app_base_dir/releases/$RPM_VERSION;
+
+# Include common functions
+. ./common_functions.sh
+
+if [[ -z $RPM_VERSION ]]; then
+    echo "Invalid RPM_VERSION!";
+    exit 1;
+fi
+
+valid_env=$(is_valid_env $ENV);
+if [[ $valid_env -eq 0 ]]; then
+    echo "Invalid ENV!";
+    exit 1;
+fi
+
+valid_app=$(is_valid_app $APPLICATION);
+if [[ $valid_app -eq 0 ]]; then
+    echo "Invalid APPLICATION!";
+    exit 1;
+fi
+
+# Upload JS and CSS to S3
+if [[ $(asset_upload_required $APPLICATION) -eq 1 ]]; then
+    echo "Upload static assets to S3 for $APPLICATION [START]"
+
+    export release_path=$release_path;
+    export ENV=$ENV;
+    if [[ $(is_rails_app $APPLICATION) -eq 1 ]]; then
+# /bin/bash -lc is added because rake command is not loaded otherwise
+      /bin/bash -l -c "cd $release_path ; source $workspace/${APPLICATION}_vars.sh;rake devops:upload_assets_to_s3 RAILS_ENV=$ENV;"
+    elif [[ $(is_nodejs_app $APPLICATION) -eq 1 ]]; then
+      /bin/bash -l -c "cd $release_path ;source $workspace/${APPLICATION}_vars.sh;node executables/upload_assets_s3.js;"
+    else
+      printf "\nAsset upload not required for $APPLICATION !\n" ;
+    fi
+    if [[ $? != 0 ]]; then
+        printf "\nError in Upload static assets to S3!\n" ; exit 1;
+    fi
+
+    echo "Upload static assets to S3 for $APPLICATION [DONE]";
+fi
+
+echo "asset  upload:  SUCCESS";
+stop_time=`date +%s`
+time_taken=$[${stop_time}-${start_time}]
+
+echo "start time : ${start_time}  stop time : ${stop_time} time taken : ${time_taken} second"

@@ -1,0 +1,38 @@
+{
+  "SecurityGroupIds_cron": {
+    "main": {
+      "SecurityGroupIds": ["sg-019827f9dbdf5089e"]
+    }
+  },
+
+  "SubnetId_1a": {
+    "main": {
+      "SubnetId": "subnet-069f4bce6d379f44e"
+    }
+  },
+
+  "SubnetId_1b": {
+    "main": {
+      "SubnetId": "subnet-0f0b7c6e31aebfbbe"
+    }
+  },
+  "ec2": {
+    "ImageId": "ami-0af78e13f18ba58ce"
+  },
+
+  "rootVolumeMap": {
+    "DeviceName": "/dev/sda1",
+    "Ebs": {"VolumeSize": "15", "VolumeType": "gp2", "SnapshotId": "snap-090e05a0839717b5a", "DeleteOnTermination": true,"Encrypted":true}
+  },
+
+  "dataVolumeMap": {
+    "DeviceName": "/dev/sdb",
+    "Ebs": {"VolumeSize": "", "VolumeType": "", "SnapshotId": "snap-0aebf5677cc8cb012", "DeleteOnTermination": true,"Encrypted":true}
+  },
+
+  "KeyName_main": {
+    "KeyName": "ost-kit-sand-staging"
+  },
+  "ec2InstanceProfileRoleARN": "arn:aws:iam::{awsAccountId}:instance-profile/ec2_instance_profile"
+
+}

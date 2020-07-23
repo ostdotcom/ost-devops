@@ -1,0 +1,22 @@
+---
+
+- name: run the playbook tasks on the localhost
+  hosts: localhost
+  become: yes
+  become_method: sudo
+  become_user: "{{ LOCAL_USER }}"
+
+  vars:
+    app_build_path: "{{ REPO_FULL_PATH }}/website/build/OST\ KIT\ alpha"
+
+  tasks:
+    - name: Add extra css property to file
+      lineinfile:
+        path: "{{ app_build_path }}/css/main.css"
+        line: ".fixedHeaderContainer header h3{display:none;visibility:hidden;}"
+
+    - name: Replace tokanize.html link
+      replace:
+        path: "{{ app_build_path }}/docs/simpletoken.html"
+        regexp: "href=\"tokenize.html\""
+        replace: "href=\"/docs/tokenize.html\""

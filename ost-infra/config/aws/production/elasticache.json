@@ -1,0 +1,15 @@
+{
+  "memcached": {
+    "CacheClusterId": "",
+    "AutoMinorVersionUpgrade": true,
+    "AZMode": "single-az",
+    "CacheNodeType": "",
+    "CacheSubnetGroupName": "",
+    "Engine": "memcached",
+    "EngineVersion": "1.4.34",
+    "NumCacheNodes": 0,
+    "Port": 11211,
+    "PreferredMaintenanceWindow": "mon:04:00-mon:05:00",
+    "SecurityGroupIds": []
+  }
+}

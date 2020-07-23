@@ -1,0 +1,51 @@
+1: Create EC2 instance take care of the below things
+   INstance type : Take reference of current Staging env
+   VPC and Subnet- Make sure that the ec2 instance is in the correct VPC and subnet group
+   Select the EBS volumes properly - for geth value node we have volumes with higher capacity
+   Select proper Security group
+
+2: ON the review page make sure the above details are correct
+
+3: Make sure that the key you are selecting is correct
+
+4: Give appropriate name like "typeofenv_applicationname_function_no""
+
+5: Make the below target groups :
+
+    ost-stag2-sand-ostweb
+    ost-stag2-sand-web
+    ost-stag2-sand-api
+    ost-stag2-sand-api-int
+    ost-stag2-sand-saasapi
+    ost-stag2-sand-saasapi-int
+    ost-stag2-sand-view
+    ost-stag2-sand-view-int
+
+Extra traget groups for internal purpose:
+    ost-stag2-sand-es
+    ost-stag2-sand-rabbitmq
+
+6: Set health checks for target group
+    - Set "Healthy threshold" to 3
+    - Set "Inetval" to 10
+
+6 Make sure that the traffic is directed to the same ports as mentioned in inventory file
+  Add targets to the target groups .
+
+7: Create internet facing load balancer (ALB)
+    - Set public availability zones (1a and 1b)
+    - Set security group
+    - Added listeners for port 80 and 443
+    - Add/Assign domain certificate to listener (443)
+    - Define rules for listeners
+
+8: Create Internal loadbalancer to route requests internally.
+    - Set private availability zones (services 1a and 1b)
+    - Set security group
+    - Added listener 443
+    - Add/Assign domain certificate to listener (443)
+    - Define rules for listeners
+
+9: Once target groupos are ready, make DNS entry in Route53 for domain/sub-domain
+    Ex: kit.ost.com, view.ost.com etc
+

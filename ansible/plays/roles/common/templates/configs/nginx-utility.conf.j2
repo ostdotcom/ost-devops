@@ -1,0 +1,126 @@
+user  deployer;
+worker_processes {{nginx.worker_processes}};
+
+error_log  {{nginx.logs_dir}}/error-{{application}}.log;
+pid        {{nginx.pid_dir}}/nginx-{{application}}.pid;
+
+events {
+    worker_connections  5000;
+    use epoll;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main '"[$time_iso8601]": USER_IP="$remote_addr" - APP_IP="$upstream_addr" - RES_TIME="$upstream_response_time" - STATUS="$status" - BODYSIZE="$body_bytes_sent" - REQUEST="$request" - REFERER="$http_referer" - AGENT="$http_user_agent" SERVER="$server_name" - HTTP_X_FORWARDED_FOR="$http_x_forwarded_for" - UPSTREAMSTATUS="$upstream_status" - PROXY="$proxy_add_x_forwarded_for"- HTTP_VIA="$http_via" - REQUEST_TIME="$request_time" - CONN_SERIAL_NUM="$connection" - CONN_REQUESTS="$connection_requests" - X-Request-Id="$upstream_http_x_request_id" - host=$host - ssl_protocol=$ssl_protocol - binary_remote_addr="$binary_remote_addr" - NGINX-REQUEST-ID="$request_id"';
+
+    access_log  {{nginx.logs_dir}}/access-{{application}}.log  main;
+
+    sendfile        on;
+    ignore_invalid_headers      on;
+    keepalive_timeout  65;
+    gzip  on;
+    gzip_static       on;
+    gzip_types text/plain application/json;
+    gzip_min_length 500;
+    gzip_http_version 1.1;
+    gzip_proxied      expired no-cache no-store private auth;
+
+    proxy_intercept_errors on;
+    server_names_hash_bucket_size 128;
+    client_max_body_size 32m;
+
+    server_tokens off;
+    more_clear_headers  'ETag' 'Server' 'X-Powered-By' 'X-Runtime';
+
+    {% if nginx.realip_from is defined %}
+    {% for item in nginx.realip_from %}
+      set_real_ip_from {{item}};
+    {% endfor %}
+      real_ip_header x-forwarded-for;
+      real_ip_recursive on;
+    {% endif %}
+
+    limit_req_zone {{nginx.rate_limit.limit_key}} zone={{application}}_reqs_1:{{nginx.rate_limit.zone_size}} rate={{nginx.rate_limit.rate}};
+    {% if nginx.whitelisted_ips is defined %}
+    geo $http_x_forwarded_for $allow {
+        default 0;
+        127.0.0.1 1;
+        {% for item in nginx.whitelisted_ips %}
+        {{item}} 1;
+        {% endfor %}
+    }
+    {% else %}
+      set $allow 1;
+    {% endif %}
+
+    server {
+        listen {{ nginx.listen_port }};
+        server_name 127.0.0.1;
+
+        set $https_rw_rule 0;
+        if ($http_x_forwarded_proto != "https") {
+            set $https_rw_rule 1;
+        }
+
+        if ($http_user_agent ~* "ELB-HealthChecker/*")
+        {
+             set $https_rw_rule 0;
+             set $allow 1;
+        }
+
+        if ($https_rw_rule = 1) {
+            return 404;
+        }
+        if ($allow = 0) {
+           return 403;
+        }
+
+        # Service unavilable enabling
+        #return 503;
+
+        client_max_body_size 32m;
+        gzip_vary         on;
+        charset utf-8;
+
+       limit_req zone={{application}}_reqs_1 burst={{nginx.rate_limit.burst_size}} delay={{nginx.rate_limit.delay}};
+       limit_req_status 429;
+       limit_conn_status 429;
+
+        location / {
+            proxy_pass http://127.0.0.1:8541;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host 127.0.0.1;
+            proxy_cache_bypass $http_upgrade;
+        }
+
+        error_page 429 =429 @429_json;
+        location @429_json {
+            default_type application/json;
+            return 200 '{"success": false, "err": {"code": "TOO_MANY_REQUESTS", "internal_id": "TOO_MANY_REQUESTS", "msg": "", "error_data":[]}}';
+        }
+
+        error_page 502 =502 @502_json;
+        location @502_json {
+            default_type application/json;
+            return 200 '{"success": false, "err": {"code": "BAD_GATEWAY", "internal_id": "BAD_GATEWAY", "msg": "", "error_data":[]}}';
+        }
+
+        error_page 503 =503 @503_json;
+        location @503_json {
+            default_type application/json;
+            return 200 '{"success": false, "err": {"code": "SERVICE_UNAVAILABLE", "internal_id": "SERVICE_UNAVAILABLE", "msg": "", "error_data":[]}}';
+        }
+
+        error_page 504 =504 @504_json;
+        location @504_json {
+            default_type application/json;
+            return 200 '{"success": false, "err": {"code": "GATEWAY_TIMEOUT", "internal_id": "GATEWAY_TIMEOUT", "msg": "", "error_data":[]}}';
+        }
+
+    }
+
+}

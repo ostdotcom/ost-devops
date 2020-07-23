@@ -1,0 +1,8 @@
+---
+
+
+chain_base_directory: "{{ dir_type }}/{{chain_node_type}}"
+chain_logs_dir: "{{ logs_dir }}/{{chain_node_type}}"
+temp_env_file_with_path: "{{ chain_base_directory }}/temp_env_vars.sh"
+vc_node_dir: "{{ chain_base_directory }}/{{node_type}}-chain"
+geth_version: "1.9.9"

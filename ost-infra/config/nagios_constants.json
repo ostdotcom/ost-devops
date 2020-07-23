@@ -1,0 +1,22 @@
+{
+  "staging": {
+    "nagiosHome": "/usr/local/nagios/etc",
+    "pluginHome": "/usr/local/nagios/libexec",
+    "hostsMaxCheckAttempts": 3,
+    "hostsCheckInterval": 5,
+    "hostsRetryInterval": 2,
+    "serviceMaxCheckAttempts": 3,
+    "serviceCheckInterval": 5,
+    "serviceRetryInterval": 2
+  },
+  "production": {
+    "nagiosHome": "/usr/local/nagios/etc",
+    "pluginHome": "/usr/local/nagios/libexec",
+    "hostsMaxCheckAttempts": 3,
+    "hostsCheckInterval": 5,
+    "hostsRetryInterval": 2,
+    "serviceMaxCheckAttempts": 3,
+    "serviceCheckInterval": 5,
+    "serviceRetryInterval": 2
+  }
+}

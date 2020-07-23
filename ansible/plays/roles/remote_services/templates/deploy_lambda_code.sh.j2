@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+
+function revertEsConfigFile(){
+    mv $1.back $1;
+}
+
+start_time=`date +%s`
+
+lambda_function_arn=$1
+s3_bucket=$2
+s3_zip_file_path=$3
+app_current_dir=$4
+config_file=$5
+aws_region=$6
+
+file_name="lambda.zip";
+
+# Upload .zip file to S3 bucket
+echo "Create build START";
+
+es_dir="${app_current_dir}/lib/elasticsearch";
+chmod -R 755 $es_dir;
+cd $es_dir;
+
+source_file="${es_dir}/${file_name}";
+dest_file="s3://${s3_bucket}/${s3_zip_file_path}/${file_name}";
+
+# Update es.json file
+es_config_file=${es_dir}/config/es.json
+mv ${es_config_file} ${es_config_file}.back;
+cp ${config_file} ${es_config_file};
+rm -rf $es_dir/node_modules $es_dir/package-lock.json ;
+npm install --production;
+if [[ $? != 0 ]]; then
+    echo "NPM install failed!";
+    revertEsConfigFile ${es_config_file}
+    exit 1;
+fi
+
+zip -r -q ${source_file} .;
+if [[ $? != 0 ]]; then
+    echo "Dir Compression (zip) failed!";
+    revertEsConfigFile ${es_config_file}
+    exit 1;
+fi
+
+echo "Create build DONE";
+echo "";
+
+echo "Upload build to S3 START";
+
+aws s3 cp ${source_file} ${dest_file} --quiet
+if [[ $? != 0 ]]; then
+    echo "Upload to s3 bucket failed!";
+    revertEsConfigFile ${es_config_file}
+    exit 1;
+fi
+
+echo "Upload build to S3 DONE";
+echo "";
+
+## Update function env vars by - update-function-configuration
+#echo "Lambda function configuration START";
+#echo "";
+#
+#env_string="Variables={CR_AWS_ACCESS_KEY='$CR_AWS_ACCESS_KEY',CR_AWS_SECRET_KEY='$CR_AWS_SECRET_KEY',CR_AWS_REGION='$CR_AWS_REGION',CR_ENVIRONMENT='$CR_ENVIRONMENT',CR_ES_HOST='$CR_ES_HOST'}";
+#aws lambda update-function-configuration --function-name $lambda_function_arn --environment $env_string --query FunctionName;
+#if [[ $? != 0 ]]; then
+#    echo "Error uploading env vars!";
+#    exit 1;
+#fi
+#echo "";
+#echo "Lambda function configuration DONE";
+#echo "";
+
+# Update lambda code by - update-function-code
+echo "Lambda function code update START";
+echo "";
+
+s3_key=${s3_zip_file_path}/${file_name}
+aws lambda update-function-code --function-name ${lambda_function_arn} --s3-bucket ${s3_bucket} --s3-key ${s3_key} --region ${aws_region} --publish --query FunctionName;
+if [[ $? != 0 ]]; then
+    echo "Error updating lambda code!";
+    revertEsConfigFile ${es_config_file}
+    exit 1;
+fi
+
+echo "";
+echo "Lambda function code update DONE";
+echo "";
+
+# Revert default es.json
+revertEsConfigFile ${es_config_file}
+
+stop_time=`date +%s`
+time_taken=$[${stop_time}-${start_time}]
+echo "start time : ${start_time}  stop time : ${stop_time} time taken : ${time_taken} second"

@@ -1,0 +1,22 @@
+{
+  "role": "{{hostvars[inventory_hostname].role}}",
+ {% if server_type is defined %}
+   "serverType": "{{server_type}}" ,
+ {% endif %}
+    "app": "{{application}}",
+    "workspaceJobs": "{{workspace}}/jobs",
+ {% if hostvars[inventory_hostname].jobs is defined %}
+  "jobs": {{jobs |to_json }},
+ {% endif %}
+ {% if hostvars[inventory_hostname].is_socket_server is defined %}
+   "isSocketServer": true,
+ {% endif %}
+ {% if nodeType is defined and nodeType == "publicNode" %}
+    "isPublicGethNode": true,
+  {% endif %}
+   "currentPath": "{{current_path}}",
+   "sharedPath": "{{shared_path}}",
+   "systemdPath":"{{systemd_files_path}}",
+   "jobLocation":"{{default_job_location}}",
+   "identifierReq": {{identifier_req}}
+}

@@ -1,0 +1,30 @@
+---
+
+- name: Create workspace dir
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{item.mode}}"
+  with_items:
+    - {path: "{{ workspace }}/jobs", mode: "0755", owner: "{{ deploy_user }}", group: "{{ deploy_user }}"}
+    - {path: "{{ checkout_dir }}", mode: "0700", owner: "{{ deploy_user }}", group: "{{ deploy_user }}"}
+    - {path: "{{ pid_dir }}", mode: "0700", owner: "{{ deploy_user }}", group: "{{ deploy_user }}"}
+    - {path: "{{ logs_dir }}", mode: "0750", owner: "{{ deploy_user }}", group: "{{ deploy_group }}"}
+    - {path: "{{ custom_env_files_dir }}", mode: "0750", owner: "{{ deploy_user }}", group: "{{ deploy_group }}"}
+    - {path: "{{ data_dir }}", mode: "0750", owner: "{{ deploy_user }}", group: "{{ deploy_group }}"}
+    - {path: "{{ default_script_location }}", mode: "0750", owner: "centos", group: "centos"}
+    - {path: "{{ default_job_location }}" , mode: "0750", owner: "centos", group: "centos"}
+
+- name: Install python36-pip
+  yum:
+    name: python36-pip
+    state: present
+
+- name: install pip3 modules on remote machine
+  shell: "sudo pip3 install {{ item }}"
+  loop:
+    - jinja2
+    - requests

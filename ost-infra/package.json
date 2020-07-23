@@ -1,0 +1,44 @@
+{
+  "name": "ost-infra",
+  "version": "1.0.0",
+  "description": "Infra management for OST",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "dependencies": {
+    "aws-sdk": "2.290.0",
+    "commander": "2.19.0",
+    "db-migrate": "0.11.3",
+    "db-migrate-mysql": "1.1.10",
+    "js-yaml": "3.13.1",
+    "json-templater": "1.2.0",
+    "mysql": "2.18.1",
+    "nunjucks": "3.2.0",
+    "pagerduty-client": "1.0.0",
+    "qs": "6.6.0",
+    "request": "2.88.2",
+    "request-promise": "4.2.2",
+    "shelljs": "0.8.3",
+    "shortid": "2.2.14",
+    "string-template": "1.0.0",
+    "web3": "1.2.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "tests/index.js"
+  },
+  "bin": {
+    "infra-test": "bin/infra-test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OpenSTFoundation/ost-infra.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OpenSTFoundation/ost-infra/issues"
+  },
+  "homepage": "https://github.com/OpenSTFoundation/ost-infra#readme"
+}

@@ -1,0 +1,25 @@
+
+Currently Dynamodb tables are created at the end of contract deployment using the below commands
+// Create tables in DynamoDB
+node executables/ddb_related_data_migrations/create_init_ddb_tables.js
+node executables/ddb_related_data_migrations/create_shards.js
+
+1: Setup lambda after you have made dynamodb tables so that you can set dynamodb triggers
+
+2: Create the function with the below name format
+    ${env_platform}_saasApi_DDB_to_ES
+    eg:] staging_4_saasApi_DDB_to_ES
+
+3: Create triggers on Dynamodb transaction tables
+
+4: Make sure you select correct vpc subnet and security group
+
+5: Attach role (staging_2_saasApi_DDB_to_ES) to Lambda function
+
+6: Verify after deployment that the env variables are currectly uploaded and that the function code is also uploaded
+
+
+7 : Create role for Lambda and Dynamodb
+
+Role: AWSServiceRoleForApplicationAutoScaling_DynamoDBTable (edited)
+attach this policy: AWSApplicationAutoscalingDynamoDBTablePolicy

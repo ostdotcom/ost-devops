@@ -1,0 +1,13 @@
+---
+
+
+- name: Include task from setup_nodejs
+  include_role:
+    name: common
+    tasks_from: update_nginx_conf
+
+
+- name: Include task from deploy restart
+  include_role:
+    name: service_handling
+  when: serviceAction is defined and serviceAction|length > 0

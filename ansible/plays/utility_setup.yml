@@ -1,0 +1,15 @@
+---
+
+- name: Setup server
+  hosts: all
+  remote_user: centos
+  become: yes
+  become_method: sudo
+  any_errors_fatal: true
+
+
+  tasks:
+  - name: Include setup utility node
+    include_role:
+      name: setup_utility_node
+

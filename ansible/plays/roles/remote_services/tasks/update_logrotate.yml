@@ -1,0 +1,5 @@
+---
+
+- name: Include task from update logrotate
+  include_role:
+    name: logrotate

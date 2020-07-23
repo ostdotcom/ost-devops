@@ -1,0 +1,88 @@
+---
+
+
+- name: Include common role
+  include_role:
+    name: common
+
+- name: Create utility chain geth dir structure
+  file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: yes
+    owner: "{{ deploy_user }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - {path: "{{ uc_geth_node_dir }}", mode: "0750", group: "{{ deploy_group }}"}
+    - {path: "{{ chain_logs_dir }}", mode: "0755", group: "{{ deploy_group }}"}
+    - {path: "{{ uc_geth_node_dir }}/keystore", mode: "0750", group: "{{ deploy_user }}"}
+
+- name: Create temp env file
+  file:
+    path: "{{ temp_env_file_with_path }}"
+    state: touch
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_group }}"
+    mode: 0700
+
+- set_fact:
+    exec_script: init_utility_node.py
+
+
+- name: Copy genesis file
+  copy:
+    src: "{{genesis_file}}"
+    dest: "{{ uc_geth_node_dir }}/uc_genesis.json"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0700
+
+- name: Update script
+  template:
+    src: "scripts/{{item}}.j2"
+    dest: "{{workspace}}/{{item}}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0700
+  with_items:
+  - "{{ exec_script }}"
+
+- name: Run script
+  become_user: "{{ deploy_user }}"
+  shell: /bin/bash -l -c 'cd {{ workspace }} ; ./{{ exec_script }} {{ geth_node_id }} {{ temp_env_file_with_path }} {{address}} {{addressPrivateKey}} {{addressPassword}}'
+  when : nodeType == "sealerNode"
+
+- name: Run script
+  become_user: "{{ deploy_user }}"
+  shell: /bin/bash -l -c 'cd {{ workspace }} ; ./{{ exec_script }} {{ geth_node_id }} {{ temp_env_file_with_path }}'
+  when : nodeType != "sealerNode"
+
+
+- name: Fetch temp env file
+  fetch:
+    src: "{{ temp_env_file_with_path }}"
+    dest: "{{ infra_workspace }}/{{chain_id}}/{{ inventory_hostname }}.json"
+    flat: yes
+
+- name: assemble all txt files
+  assemble:
+    src: "{{ infra_workspace }}/{{chain_id}}"
+    dest: "{{enodes_out_file}}"
+  run_once: yes
+  delegate_to: localhost
+  become: true
+  become_user: "{{ local_user }}"
+
+
+- name: Clean tmp directory
+  file:
+    state: absent
+    path: "{{ infra_workspace }}/{{chain_id}}/"
+  run_once: yes
+  delegate_to: localhost
+  become: true
+  become_user: "{{ local_user }}"
+
+- include_role:
+    name: logrotate

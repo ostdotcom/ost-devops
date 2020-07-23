@@ -1,0 +1,115 @@
+#!/bin/bash 
+#########################################################################
+#NAME : S3_Sync_Files.sh
+#Purpose : Sync files from given local path to S3 bucket 
+#Author : Aman Pruthi
+#############################################################
+
+#the below function prints the usage of the script
+function Usage_Guide 
+{
+  echo "Usage: $0 -p company-staging-api -f local file path/paths seperated by comma -s s3://logs.stagingost.com -e environment_type production or staging -a app_name api -t profile type company or staging" 1>&2
+  exit 1
+
+}
+
+
+#The below function stores the arguments to variables and checks if all the variables were correctly passed 
+function Script_Usage()
+{
+ while getopts ":s:e:a:f:p:b:" options
+  do
+    case "${options}" in
+        p)
+                   export PLATFORM=${OPTARG}
+                   ;;
+        s)
+                    export SUB_ENV=${OPTARG}
+                    ;;
+
+        b)
+            export S3_BUCKET=${OPTARG}
+            ;;
+        e)
+            export ENV_TYPE=${OPTARG}
+            ;;
+	      a)
+	          export APP_NAME=${OPTARG}
+ 	          ;;
+	      f)
+	          export LOCAL_FILE_PATH=${OPTARG}
+	          ;;
+
+        h)
+            Script_Usage
+            ;;
+        *)
+            Script_Usage
+            ;;
+    esac
+ done
+ shift $((OPTIND-1))
+ if [[   -z "${S3_BUCKET}" || -z "${ENV_TYPE}" || -z "${APP_NAME}"  ]]
+  then
+   Usage_Guide
+   echo "ERROR"  
+  fi
+ if [[ -z ${LOCAL_FILE_PATH} ]]
+  then
+    if [[ -z ${APP_NAME} ]]
+     then
+     Usage_Guide
+    else
+     echo "As local file path is not defined we are exiting"
+     exit 1
+   fi
+ fi
+ echo "S3_BUCKET = ${S3_BUCKET}"
+ echo "ENV_TYPE  = ${ENV_TYPE}"
+}
+
+#  The below function validates whether the connection creds are present these are required by aws cli 
+
+### This function actualy syncs the files to S3 using aws cli command 
+function Sync2Bucket
+{
+    for FILE_PATH in `echo ${LOCAL_FILE_PATH}| sed "s/,/ /g"`
+     do
+    	TEMP_APP_NAME=${APP_NAME}
+	    if [[ `echo ${FILE_PATH}|grep nginx` != "" ]]
+	     then
+	       TEMP_APP_NAME=nginx 
+	    fi 
+      for FILE in `find ${FILE_PATH}  -name "*.log-bkp*.gz"` 
+        do
+        FILE_NAME=`basename ${FILE}`
+        HOST_NAME=`hostname -i`
+        if [[ -z `ls ${FILE}| grep ${HOST_NAME} ` ]]
+        then   
+          NEW_FILE_NAME="$(hostname -i)-${FILE_NAME}"
+          mv "${FILE}" "${FILE_PATH}/${NEW_FILE_NAME}"
+        else 
+          NEW_FILE_NAME=${FILE_NAME}
+        fi 
+        aws s3 cp ${FILE_PATH}/${NEW_FILE_NAME} ${S3_BUCKET}/${PLATFORM}/${SUB_ENV}/${TEMP_APP_NAME}/logs/
+	      if [[ $? -eq 0 ]]
+	       then
+          lastUpdate=$(date -r  ${FILE_PATH}/${NEW_FILE_NAME} +%s)
+          now=$(date +%s)
+          diff=$[(${now}-${lastUpdate})/(60*60)]
+          if [[ ${diff} -ge 96 ]]
+          then 
+        	  echo "Upload ${FILE_PATH}/${NEW_FILE_NAME} successfull deleting ${FILE_PATH}/${NEW_FILE_NAME} now "
+            rm -f "${FILE_PATH}/${NEW_FILE_NAME}"
+          fi
+      	 else 
+      	  echo "Upload of $FILE failed so exiting "
+	      fi 
+        done
+   done 
+}
+
+#######################################   MAIN SECTION #######################
+
+Script_Usage $@
+Sync2Bucket

@@ -1,0 +1,15 @@
+---
+
+- name: Deploy Build
+  hosts: all
+  remote_user: "{{remoteUser}}"
+  become: yes
+  become_method: sudo
+  any_errors_fatal: true
+  gather_facts: no
+
+
+
+  tasks:
+  - include_role:
+      name: deploy

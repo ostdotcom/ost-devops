@@ -1,0 +1,38 @@
+---
+
+- set_fact:
+    exec_script: propose_sealer.py
+
+
+- name: Update script
+  template:
+    src: "scripts/{{item}}.j2"
+    dest: "{{workspace}}/{{item}}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0700
+  with_items:
+    - "{{ exec_script }}"
+  when: nodeType == "sealerNode"
+
+- name: Run script
+  become_user: "{{ deploy_user }}"
+  shell: /bin/bash -l -c 'cd {{ workspace }} ; ./{{ exec_script }} {{propose_address}} {{propose_type}}'
+  when: nodeType == "sealerNode" and address != propose_address
+
+- name: Start geth utility node
+  systemd:
+    name: geth_un
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+  when: nodeType == "sealerNode"
+
+- name: Start geth utility node
+  systemd:
+    name: geth_un
+    daemon_reload: yes
+    state: restarted
+    enabled: yes
+
+

@@ -1,0 +1,18 @@
+# {{ ansible_managed }}
+{% set logPath = logsDirPath.split(',') %}
+{% for log in logPath %}
+  {{log}}/*.log
+{% endfor %}
+ {
+   daily
+   missingok
+   rotate 10
+   compress
+   notifempty
+   create 640 {{ deploy_user }} {{ deploy_group }}
+   sharedscripts
+   dateext
+   dateformat -bkp-%Y-%m-%d-%s.log
+   copytruncate
+}
+

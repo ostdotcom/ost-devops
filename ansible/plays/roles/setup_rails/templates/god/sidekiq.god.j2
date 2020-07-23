@@ -1,0 +1,87 @@
+rails_root  = "{{current_path}}"
+rails_env   = ENV['RAILS_ENV']
+
+require "#{rails_root}/lib/global_constant/sidekiq"
+
+queue_check_interval = 1
+
+num_workers = {{ god.num_workers }}
+
+queues = GlobalConstant::Sidekiq.queue_names.values
+high_queues, med_queues, low_queues, others = [], [], [], []
+queues.each do |_q|
+  q = _q.to_s
+  if q.to_s.match('st_api_high')
+    high_queues << q
+  elsif q.to_s.match('st_api_med')
+    med_queues << q
+  elsif q.to_s.match('st_api_low')
+    low_queues << q
+  else
+    others << q
+  end
+end
+final_queue_names = high_queues + med_queues + low_queues + others
+queue_str = ""
+final_queue_names.uniq.each do |q|
+  queue_str += "-q #{q} "
+end
+
+num_workers.times do |num|
+  God.watch do |w|
+
+    w.name 		 = "sidekiq_{{ application }}_#{num}"
+    w.group    = "sidekiq_{{ application }}"
+
+    w.interval = 180.seconds
+
+    w.dir = rails_root
+    w.log = "{{ god.log_dir }}/sidekiq-{{application}}.log"
+    w.pid_file = "{{ god.pid_dir }}/#{w.name}.pid"
+
+    w.start = "{{gemset_wrappers}}/sidekiq -d -C #{rails_root}/config/sidekiq.yml -P {{ god.pid_dir }}/#{w.name}.pid -e #{rails_env} -L #{rails_root}/log/sidekiq.log -r #{rails_root} #{queue_str}"
+    w.stop = "{{gemset_wrappers}}/sidekiqctl stop {{ god.pid_dir }}/#{w.name}.pid 20"
+
+    w.uid = '{{deploy_user}}'
+    w.gid = '{{deploy_user}}'
+
+    # retart if memory gets too high
+    w.transition(:up, :restart) do |on|
+      on.condition(:memory_usage) do |c|
+        c.above = 350.megabytes
+        c.times = 2
+        c.notify = {:contacts => ['developers'], :priority => 1, :category => 'OST Platform {{ application }} {{ env }}'}
+      end
+    end
+
+    # determine the state on startup
+    w.transition(:init, { true => :up, false => :start }) do |on|
+      on.condition(:process_running) do |c|
+        c.running = true
+      end
+    end
+
+    # determine when process has finished starting
+    w.transition([:start, :restart], :up) do |on|
+      on.condition(:process_running) do |c|
+        c.running = true
+        c.interval = 5.seconds
+      end
+
+      # failsafe
+      on.condition(:tries) do |c|
+        c.times = 5
+        c.transition = :start
+        c.interval = 5.seconds
+      end
+    end
+
+    # start if process is not running
+    w.transition(:up, :start) do |on|
+      on.condition(:process_running) do |c|
+        c.running = false
+        c.notify = {:contacts => ['developers'], :priority => 1, :category => 'OST Platform {{ application }} {{ env }}'}
+      end
+    end
+  end
+end

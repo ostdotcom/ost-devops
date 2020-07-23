@@ -1,0 +1,35 @@
+---
+
+server_type: nodejs
+js_package_manager: yarn
+is_web: false
+
+flush_memcache: False
+flush_redis: False
+
+nginx:
+  worker_processes: 5
+  listen_port: 8010
+  app_port: 4040
+  logs_dir: "{{ logs_dir }}/nginx"
+  pid_dir: "{{pid_dir}}"
+  rate_limit:
+    burst_size: 20
+    delay: 10
+    zone_size: 30m
+    rate: "200r/s"
+    limit_key: "$remote_addr"
+  realip_from:
+    - 10.49.0.0/20
+    - 10.49.64.0/20
+    - 10.50.0.0/20
+    - 10.50.64.0/20
+
+
+
+pagerduty:
+  cron_time_in_minute: "*/5"
+  geth_block_check_time_interval: "300"
+
+systemd:
+  ExecStartPre: "cp {{ custom_env_files_dir }}/{{ app_env_file }} {{ current_path }}/.env"

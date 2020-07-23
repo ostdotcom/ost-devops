@@ -1,0 +1,209 @@
+#!/usr/bin/env bash
+
+usage='./pentaho_backup_and_restore.sh --action <Action to take [backup|restore]> --help'
+
+while [ $# -gt 0 ]; do
+    key=$1
+    case ${key} in
+        --action)
+            shift
+            export ACTION=$1
+            ;;
+        --help)
+            echo $usage
+            exit 0
+            ;;
+        *)
+            echo $usage
+            exit 1
+            ;;
+    esac
+    shift
+done
+
+BI_SERVER_HOME="{{ pentaho.bi_server_home }}"
+S3_BUCKET="{{ devops_s3_bucket }}"
+S3_REGION="{{ aws_region }}"
+S3_FILE_PATH_PREFIX="pentaho/backups"
+APP_PORT="{{ nginx.app_port }}"
+
+ADMIN_USER=${PENTAHO_ADMIN_USER}
+ADMIN_PW=${PENTAHO_ADMIN_PW}
+ENV={ENVIRONMENT}
+SUB_ENV=${SUB_ENVIRONMENT}
+ENV_SUFFIX=${ENV_SUFFIX}
+
+ACTION=${ACTION:-backup}
+EMAIL_SUBJECT_TAG="ostAnalytics::Pentaho:${ENV}:${SUB_ENV}:${ENV_SUFFIX}";
+MACHINE_IP=$(hostname -i);
+EMAIL_NO_LOGFILE_LINES=50;
+EMAIL_SUBSCRIBERS="backend@ost.com";
+LOG_FILE="pentaho_backup.log"
+
+function lock_handling(){
+
+    LOCKFILE="/tmp/`basename $0`"
+    LOCKFD=200
+
+    # PRIVATE
+    _lock()             { flock -$1 $LOCKFD; }
+    _no_more_locking()  { _lock u; _lock xn && rm -f $LOCKFILE; }
+    _prepare_locking()  { eval "exec $LOCKFD>\"$LOCKFILE\""; trap _no_more_locking EXIT; }
+
+    # ON START
+    _prepare_locking
+
+    # PUBLIC
+    exlock_now()        { _lock xn; }  # obtain an exclusive lock immediately or fail
+    exlock()            { _lock x; }   # obtain an exclusive lock
+    shlock()            { _lock s; }   # obtain a shared lock
+    unlock()            { _lock u; }   # drop a lock
+
+    ### BEGIN OF SCRIPT ###
+
+    # Simplest example is avoiding running multiple instances of script.
+    exlock_now
+    if [[ $? != 0 ]]; then
+        echo "********** Error acquiring lock **********"
+        exit 1;
+    fi
+
+    echo "********** Lock acquired **********"
+}
+
+function handle_error(){
+    subject=$1
+    log_file_path=$2
+    echo ${sub}
+
+    # Send email
+    if [[ ! -z ${subject} ]]; then
+        send_email "${subject}" "${log_file_path}"
+        echo "********** Error: ${subject} [$(date '+%Y-%m-%d %H:%M:%S')] **********"
+        cleanup_temp_files ${log_file_path}
+        exit 1
+    fi
+}
+
+function send_email(){
+    local subject=$1
+    local log_file_path=$2
+    if [[ -z ${log_file_path} ]]; then
+        log_file_path="temp"
+        touch ${log_file_path}
+    fi
+    mail_body_file=${log_file_path}.mail
+    touch ${mail_body_file}
+    echo "Date: $(date '+%Y-%m-%d %H:%M:%S')" > ${mail_body_file}
+    echo "IP ADDRESS: ${MACHINE_IP}" >> ${mail_body_file}
+    echo "" >> ${mail_body_file}
+    echo "Last ${EMAIL_NO_LOGFILE_LINES} lines: " >> ${mail_body_file}
+    tail -${EMAIL_NO_LOGFILE_LINES} ${log_file_path} >> ${mail_body_file}
+    cat ${mail_body_file} | mail -s "${EMAIL_SUBJECT_TAG} ${subject}" "${EMAIL_SUBSCRIBERS}"
+    rm -f ${mail_body_file}
+}
+
+function cleanup_temp_files(){
+    file=$1
+    if [[ -f ${file} ]]; then
+        rm -f ${file}
+    fi
+}
+
+function backup() {
+    if [[ -d ${BI_SERVER_HOME} ]]; then
+
+        cd ${BI_SERVER_HOME}
+
+        echo -e "\n*************** Backup ***************\n" >> ${LOG_FILE}
+
+        # Run backup
+        ts=$(date +%s)
+        zip_file="pentaho_backup_${ts}.zip"
+        echo "***** Pentaho backup: ${zip_file} *****"
+        ./import-export.sh --backup --url=http://localhost:${APP_PORT}/pentaho --username=${ADMIN_USER} --password=${ADMIN_PW} --file-path=${zip_file} --logfile=${LOG_FILE}
+        if [[ $? != 0 ]]; then
+            handle_error "Error backing up Pentaho BI Server for TS: ${ts}" ${BI_SERVER_HOME}/${LOG_FILE}
+        fi
+
+        echo -e "\n\n*************** Upload ***************\n\n" >> ${LOG_FILE}
+
+        # Upload file to S3
+        dt=$(date +'%d-%m-%Y')
+        s3_url="s3://${S3_BUCKET}/${S3_FILE_PATH_PREFIX}/${dt}/${zip_file}"
+        echo "***** S3 upload: ${s3_url} *****"
+        aws s3 cp ${zip_file} ${s3_url} --region ${S3_REGION} 2>&1 >> ${LOG_FILE}
+        if [[ $? != 0 ]]; then
+            handle_error "Error uploading back-up data for Pentaho BI Server for TS: ${ts}" ${BI_SERVER_HOME}/${LOG_FILE}
+        fi
+
+        # Update latest file
+        s3_url="s3://${S3_BUCKET}/${S3_FILE_PATH_PREFIX}/latest.zip"
+        echo "***** S3 upload: ${s3_url} *****"
+        aws s3 cp ${zip_file} ${s3_url} --region ${S3_REGION} 2>&1 >> ${LOG_FILE}
+        if [[ $? != 0 ]]; then
+            handle_error "Error uploading latest back-up data for Pentaho BI Server for TS: ${ts}" ${BI_SERVER_HOME}/${LOG_FILE}
+        fi
+
+        # Cleanup temp log files
+        cleanup_temp_files ${LOG_FILE}
+        cleanup_temp_files ${zip_file}
+
+    else
+        echo "***** No BI server home directory found! *****"
+    fi
+}
+
+function restore() {
+    if [[ -d ${BI_SERVER_HOME} ]]; then
+
+        cd ${BI_SERVER_HOME}
+
+        echo -e "\n\n*************** Download ***************\n\n" >> ${LOG_FILE}
+
+        # Download latest zip file from S3
+        zip_file="latest.zip"
+        s3_url="s3://${S3_BUCKET}/${S3_FILE_PATH_PREFIX}/${zip_file}"
+        echo "***** S3 download: ${s3_url} *****"
+        aws s3 cp ${s3_url} . --region ${S3_REGION} 2>&1 >> ${LOG_FILE}
+        if [[ $? != 0 ]]; then
+            handle_error "Error downloading latest back-up data for Pentaho BI Server" ${BI_SERVER_HOME}/${LOG_FILE}
+        fi
+
+        echo -e "\n*************** Restore ***************\n" >> ${LOG_FILE}
+
+        # Run Restore
+        echo "***** Pentaho Restore: ${zip_file} *****"
+        ./import-export.sh --restore --url=http://localhost:${APP_PORT}/pentaho --username=Admin --password=password --file-path=${zip_file} --overwrite=true --logfile=${LOG_FILE}
+        if [[ $? != 0 ]]; then
+            handle_error "Error restoring Pentaho BI Server" ${BI_SERVER_HOME}/${LOG_FILE}
+        fi
+
+        # Cleanup temp log files
+        cleanup_temp_files ${LOG_FILE}
+        cleanup_temp_files ${zip_file}
+
+    else
+        echo "***** No BI server home directory found! *****"
+    fi
+}
+
+function main(){
+
+    echo "********** Main Start **********"
+
+    if [[ ${ACTION} == "backup" ]]; then
+        backup
+    elif [[ ${ACTION} == "restore" ]]; then
+        restore
+    else
+        handle_error "Invalid ACTION param [Usage: ${usage}]"
+    fi
+
+    echo "********** Main End **********"
+}
+
+# Do not allow multiple instances to run
+lock_handling
+# Main task
+main

@@ -1,0 +1,21 @@
+---
+# tasks file for roles/setup_rails
+
+# Setup common deployment tasks
+- name: Include deployment setup from common role
+  include_role:
+    name: common
+    tasks_from: deploy_setup
+
+
+# app server setup
+- include_role:
+    name: common
+    tasks_from: update_nginx_conf
+  when: role is defined and role == "app"
+
+# Sidekiq job setup
+- include_tasks: job.yml
+  when: role is defined and role == "cron" and sidekiq_required|bool
+
+

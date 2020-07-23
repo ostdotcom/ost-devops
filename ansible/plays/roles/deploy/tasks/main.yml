@@ -1,0 +1,7 @@
+---
+
+- include_tasks: scripts/index.yml
+  when: (server_type is defined and (server_type == "rails" or server_type == "nodejs")) or qa_deploy is defined
+
+
+

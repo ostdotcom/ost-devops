@@ -1,0 +1,18 @@
+[Unit]
+Description=ostweb - Nginx server for ost web
+After=remote-fs.target
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=deployer
+Type=forking
+ExecStartPre={{deploy_home}}/libs/nginx/sbin/nginx -t -c {{deploy_home}}/libs/nginx/conf/ostWeb.conf
+ExecStart={{deploy_home}}/libs/nginx/sbin/nginx -c {{deploy_home}}/libs/nginx/conf/ostWeb.conf
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+KillSignal=SIGINT
+
+[Install]
+WantedBy=multi-user.target

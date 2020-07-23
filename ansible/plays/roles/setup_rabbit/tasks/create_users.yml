@@ -1,0 +1,30 @@
+---
+
+
+
+- name: list users
+  shell: rabbitmqctl list_users
+  run_once: yes
+  register: accnt_list
+
+- name: Check if app user exists
+  set_fact:
+    app_exists : true
+  run_once: yes
+  when: rabbit_username in accnt_list
+
+
+
+- name: create  app user and give permissions
+  shell: |
+    rabbitmqctl add_user "{{rabbit_username}}" "{{rabbit_password}}";
+    rabbitmqctl set_user_tags "{{rabbit_username}}" management;
+    rabbitmqctl set_permissions -p / "{{rabbit_username}}" ".*" ".*" ".*";
+    rabbitmqctl set_topic_permissions -p / "{{rabbit_username}}" "(AMQP default)" ".*" ".*";
+  run_once: yes
+  when: app_exists is not defined
+
+- name: Delete guest user if it exists
+  shell: rabbitmqctl delete_user guest ;
+  run_once: yes
+  when: "'guest' in accnt_list.stdout"

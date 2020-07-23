@@ -1,0 +1,37 @@
+{
+  "SecurityGroupIds_app": {
+    "default": {
+      "SecurityGroupIds": []
+    },
+    "main": {
+      "SecurityGroupIds": ["sg-0448867c85afc6553","sg-014601c84b4a9481e"]
+    }
+  },
+
+  "SecurityGroupIds_cron": {
+    "default": {
+      "SecurityGroupIds": [""]
+    },
+    "main": {
+      "SecurityGroupIds": [""]
+    }
+  },
+
+  "SubnetId_1a": {
+    "default": {
+      "SubnetId": ""
+    },
+    "main": {
+      "SubnetId": "subnet-069f4bce6d379f44e"
+    }
+  },
+
+  "SubnetId_1b": {
+    "default": {
+      "SubnetId": ""
+    },
+    "main": {
+      "SubnetId": "subnet-0f0b7c6e31aebfbbe"
+    }
+  }
+}

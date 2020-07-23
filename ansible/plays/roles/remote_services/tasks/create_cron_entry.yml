@@ -1,0 +1,38 @@
+---
+- set_fact:
+    task_infile: "{{ exec_path}}/{{ data_key }}.json"
+    task_outfile: "{{ exec_path}}/{{ data_key }}.json"
+
+#- debug: var=local_outfile
+#- debug: var=hostvars[inventory_hostname].{{data_key}}
+
+- copy:
+    content: "{{ hostvars[inventory_hostname][hostvars[inventory_hostname].data_key]|to_nice_json }}"
+    dest: "{{ task_infile }}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0755
+  when: data_key is defined
+
+- name: Run script to create entry in saas db table
+  become_user: "{{ deploy_user }}"
+  shell: /bin/bash -lc ' source {{workspace}}/{{application}}_vars.sh ;cd {{exec_path}} ; node devops/exec/cronServices.js --create --in-file {{ task_infile }} --out-file {{ task_outfile }}'
+  when: buildNumber|bool
+
+- name: Run script to create entry in saas db table
+  become_user: "{{ deploy_user }}"
+  shell: /bin/bash -lc ' cd {{exec_path}} ; node devops/exec/cronServices.js --create --in-file {{ task_infile }} --out-file {{ task_outfile }}'
+  when: not buildNumber|bool
+
+- name: Fetch Task out file from remote machine to infra workspace
+  fetch:
+    src: "{{ task_outfile }}"
+    dest: "{{ local_outfile }}"
+    flat: yes
+  become_user: "{{ deploy_user }}"
+  run_once: true
+
+- name: Clean tmp app var file
+  file:
+    state: absent
+    path: "{{workspace}}/{{application}}_vars.sh "

@@ -1,0 +1,27 @@
+---
+
+server_type: nodejs
+is_web: false
+asset_upload_required: false
+
+pentaho:
+  bi_server_home: "{{ app_base_directory }}/pentaho-server"
+  data_integration_home: "{{ app_base_directory }}/data-integration"
+
+nginx:
+  worker_processes: 5
+  listen_port: 8020
+  app_port: 8080
+  logs_dir: "{{ logs_dir }}/nginx"
+  pid_dir: "{{pid_dir}}"
+  rate_limit:
+    burst_size: 30
+    delay: 20
+    zone_size: 30m
+    rate: "50r/s"
+    limit_key: "$remote_addr"
+  realip_from:
+    - 10.49.0.0/20
+    - 10.49.64.0/20
+    - 10.50.0.0/20
+    - 10.50.64.0/20

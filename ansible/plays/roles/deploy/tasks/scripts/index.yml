@@ -1,0 +1,30 @@
+---
+
+- name: Copy executables
+  include_role:
+    name: common
+    tasks_from: update_deploy_scripts
+  when: copy_execs is defined and copy_execs|bool
+
+- name: "Deploy build for {{ application }}"
+  become_user: "{{ deploy_user }}"
+  shell: /bin/bash -l -c 'cd {{ workspace }} ; ./deploy_build.sh {{rpm_version}} {{application}} {{s3_builds_path}} {{s3_configs_path}} {{js_package_manager}} {{aws_region}}'
+  register: out
+- debug: var=out
+
+
+- name: Copy bootnodes json file
+  copy:
+    src: "{{enodes_input_file}}"
+    dest: "{{bootnodes_file}}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: 0700
+  when:  enodes_input_file is defined and enodes_input_file!=""
+
+- include_tasks: deployWithRestart.yml
+  when: serviceAction is defined and serviceAction|length >0
+
+
+
+

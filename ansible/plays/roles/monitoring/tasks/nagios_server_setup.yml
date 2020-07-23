@@ -1,0 +1,108 @@
+---
+
+- name: Set selinux in permissive mode
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: 'SELINUX=permissive'
+
+- name: run setEnforce
+  shell: |
+    setenforce 0
+  become: true
+
+
+
+- name: Install nagios packages and common plugins
+  yum:
+    name:
+    - gcc
+    - glibc
+    - glibc-common
+    - wget
+    - unzip
+    - httpd
+    - php
+    - gd
+    - gd-devel
+    - perl
+    - postfix
+    state: present
+  become: true
+
+- name: remove tars from /tmp
+  file:
+    path: "/tmp/*"
+    state: absent
+
+- name: get nagios using wget
+  shell: |
+    cd /tmp
+    wget -O nagioscore.tar.gz https://github.com/NagiosEnterprises/nagioscore/archive/nagios-4.4.3.tar.gz
+    tar xzf nagioscore.tar.gz
+  become: true
+
+- name: compile nagios and install
+  shell: |
+    cd /tmp/nagioscore-nagios-4.4.3/
+    sh configure --with-command-group={{deploy_user}} --with-nagios-group={{deploy_user}} --with-nagios-user={{deploy_user}}
+    make all
+    make install
+    make install-commandmode
+    make install-init
+    make install-config
+    make install-webconf
+    usermod -G {{deploy_user}} apache
+    make install-daemoninit
+    systemctl enable httpd.service
+  become: true
+
+- include_tasks: plugins_nrpe.yml
+
+- name: Create nagios admin user
+  command: htpasswd -b -c {{nagios_home}}/htpasswd.users {{nagiosBasicAuthUserName}} {{nagiosBasicAuthPassword}}
+  become: true
+
+- name: create directories
+  file:
+    path: "{{item}}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+  with_items:
+  - "{{nagios_home}}/configs"
+  - "{{nagios_home}}/defaults"
+
+- name: copy nagios cfg files
+  copy:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_user }}"
+    mode: "0755"
+  with_items:
+  - {src: "{{commands_config_file}}" , dest: "{{nagios_home}}/defaults/"}
+  - {src: "{{default_config_file}}", dest: "{{nagios_home}}/defaults/"}
+  - {src: "{{nagios_config_file}}", dest: "{{nagios_home}}/"}
+  - {src: "{{cgi_config_file}}", dest: "{{nagios_home}}/"}
+  - {src: "{{httpd_config_file}}", dest: "{{httpd_home}}/"}
+
+
+- name: Remove default object directory and nagios service
+  file:
+    path: "{{nagios_home}}/objects"
+    state: absent
+
+- name: Start  apache server
+  systemd:
+    name: httpd
+    state: restarted
+    enabled: yes
+
+- name: Start  nagios server
+  systemd:
+    name: nagios
+    state: restarted
+    enabled: yes
+

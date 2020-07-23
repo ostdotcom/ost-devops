@@ -1,0 +1,76 @@
+#!/bin/bash 
+##################################################################
+#Script_name - getpeers.sh
+#Purpose - Add peers to the value node periodically so that geth is able to mine blocks 
+#Author - Aman Pruthi
+############################################################
+#the below function prints the usage of the script
+export STAGING_URL=`curl https://gist.github.com/rfikki/31393c66b59f906a9a2e5a84215e8b00.js | tr ' ' '\n'|grep "/constantinople-ropsten-peers\.txt"|awk -F'"' '{print $2}'|awk -F'\' '{print $1}'`
+export PRODUCTION_URL=`curl https://gist.github.com/rfikki/a2ccdc1a31ff24884106da7b9e6a7453.js|tr ' ' '\n'|grep "\/mainnet-peers-latest\.txt"|awk -F'"' '{print $2}'|awk -F'\' '{print $1}'`
+
+
+function Usage_Guide() 
+{
+  echo "Usage: $0 -c chain_id -> either ethereum testnet or mainnet chain id  " 1>&2
+  exit 1
+
+}
+
+
+#The below function stores the arguments to variables and checks if all the variables were correctly passed 
+function Script_Usage()
+{
+ while getopts ":c:" options
+  do
+    case "${options}" in
+        c)
+          export CHAIN_ID=${OPTARG}
+            ;;
+        *)
+            Usage_Guide
+            ;;
+    esac
+ done
+ shift $((OPTIND-1))
+ if [[ -z ${CHAIN_ID} ]]
+ then 
+ 	Usage_Guide
+ fi 
+ echo "CHAIN_ID  = ${CHAIN_ID}"
+}
+
+######################This function gets peers #############################
+function getpeers()
+{
+ if [[ ${CHAIN_ID} = 1 ]]
+ then
+  URL=`echo ${PRODUCTION_URL}` 	
+ else
+  URL=`echo ${STAGING_URL}` 	
+ fi
+
+ echo "URL: ${URL}";
+
+ if [[ `ls -lart /mnt/st-company/geth/*chain/node_*/geth.ipc` ]]
+ then
+  GETH_FILE=`ls  /mnt/st-company/geth/*chain/node_*/geth.ipc`
+ else
+  echo "geth file doesnt exist "
+  exit 1 
+ fi
+
+ for LINE in `curl --max-time 60 -L -s $URL | grep 'enode:'`
+  do 
+  echo "geth attach $GETH_FILE --exec '$LINE'"
+  geth attach ${GETH_FILE} --exec ${LINE}
+  echo $? 
+ done
+ geth attach ${GETH_FILE} --exec admin.peers.length
+}
+
+
+
+#######################################   MAIN SECTION #######################
+
+Script_Usage $@
+getpeers

@@ -1,0 +1,14 @@
+---
+
+- name: Execute remote task
+  hosts: all
+  remote_user: "{{remoteUser}}"
+  become: yes
+  become_method: sudo
+  any_errors_fatal: true
+
+  tasks:
+  - name: "Run remote service for task {{ remote_task }}"
+    include_role:
+      name: remote_services
+

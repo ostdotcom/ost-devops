@@ -36,7 +36,7 @@ class SendHighSeverityErrorEmails {
    * @return {String}
    */
   static subject(errorRow) {
-    return `[${errorRow.env_id}] :: ${errorRow.app} :: Severity: ${errorRow.severity} :: Kind: ${errorRow.kind}`;
+    return `${errorRow.env_id} :: ${errorRow.app} :: Severity: ${errorRow.severity} :: Kind: ${errorRow.kind}`;
   }
 
   /**

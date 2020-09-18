@@ -46,9 +46,9 @@ const servicePrototype = {
       throw oThis.getError('Invalid branchName!', 'err_ser_as_bld_v3');
     }
 
-    if(options.branchName === 'master'){
-      throw oThis.getError('Build from master is not allowed!', 'err_ser_as_bld_v4');
-    }
+    // if(options.branchName === 'master'){
+    //   throw oThis.getError('Build from master is not allowed!', 'err_ser_as_bld_v4');
+    // }
 
     let initParams = await oThis.getAppInitParams(options.subEnv);
     oThis.shellExec = new ShellExecKlass(initParams);

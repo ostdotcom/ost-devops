@@ -77,7 +77,7 @@ if [[ $st_profile == "company" ]]; then
   elif [[ $APPLICATION == "api" ]]; then
     repo_dir="kit-api";
   elif [[ $APPLICATION == "saasApi" ]]; then
-    repo_dir="saas-api";
+    repo_dir="platform-api";
     tar_exclusions+=('package-lock.json')
   elif [[ $APPLICATION == "ostView" ]]; then
     repo_dir="ost-view";

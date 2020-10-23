@@ -12,17 +12,11 @@ fi
 
 cd $actual_dir;
 
-
 # Include global vars
 . ../utils/global_vars.sh;
 
 # Include common functions
 . ../utils/functions.sh;
-
-## Test vars start
-#ENV="staging";
-#BRANCH_NAME="master";
-## Test vars end
 
 APPLICATION="apiDocs";
 PLATFORM=1;
@@ -34,20 +28,9 @@ echo "APPLICATION: $APPLICATION";
 echo "BRANCH_NAME: $BRANCH_NAME";
 echo "";
 
-ST_PROFILE=company
-# AWS CLI profile to use, you can create profile using function "configure_aws"
-AWS_PROFILE="company-production-apiDocs"
-S3_UPLOAD_BUCKET="s3://docs.ost.com"
-S3_REGION="us-east-1"
-AWS_CLI_OUTPUT="json"
-
-# AWS hosted api docs cloudfront distribution
-CLOUDFRONT_DISTRIBUTION_ID="E2ZQRP2L4D761I";
-
-aws_profile=$AWS_PROFILE;
-aws_region=$S3_REGION;
-s3_upload_bucket=$S3_UPLOAD_BUCKET;
-cloudfront_distribution_id=$CLOUDFRONT_DISTRIBUTION_ID;
+aws_region="us-east-1";
+s3_upload_bucket="s3://docs.ost.com";
+cloudfront_distribution_id="E2ZQRP2L4D761I";
 
 seperator_line="~~~~~~~~~~~~";
 repo_dir="website-docupony";
@@ -93,22 +76,9 @@ if [[ $status -ne 0 ]]; then
     exit 1;
 fi
 
-
-
-#cd $actual_dir;
-#inventory_file="../inventories/localhost.yml";
-#playbook="../plays/local/api_docs_upload.yml"
-
-#env ansible-playbook -i $inventory_file $playbook --extra-vars "APPLICATION=$APPLICATION ENV=$ENV REPO_FULL_PATH=$repo_full_path LOCAL_USER=$LOCAL_USER";
-#if [[ $? != 0 ]]; then
-#    error_msg "Replace text failed!!!";
-#    exit 1;
-#fi
-
-
 #Clean bucket
-echo "aws s3  rm --recursive $s3_upload_bucket/ --profile $aws_profile"
-aws s3  rm --recursive $s3_upload_bucket/ --profile $aws_profile
+echo "aws s3  rm --recursive $s3_upload_bucket/"
+aws s3  rm --recursive $s3_upload_bucket/
 if [[ $? != 0 ]]; then
     error_msg "S3 Cleanup Failed!!!";
     exit 1;
@@ -116,20 +86,20 @@ fi
 # Upload static files to S3 bucket
 cd $repo_full_path;
 echo "pwd: $(pwd)";
-echo "aws s3 cp --recursive website/build/OST\ KIT\ alpha/ $s3_upload_bucket/ --acl public-read --profile $aws_profile"
-aws s3 cp --recursive build-root/ $s3_upload_bucket/ --acl public-read --profile $aws_profile
+echo "aws s3 cp --recursive website/build/OST\ KIT\ alpha/ $s3_upload_bucket/ --acl public-read"
+aws s3 cp --recursive build-root/ $s3_upload_bucket/ --acl public-read
 if [[ $? != 0 ]]; then
     error_msg "S3 Build upload failed!!!";
     exit 1;
 fi
 
 #  Change metadata for svg files
-aws s3 cp --recursive  --exclude '*'  --include '*.svg' --content-type="image/svg+xml" --metadata-directive="REPLACE" $s3_upload_bucket $s3_upload_bucket --acl public-read --profile $aws_profile
+aws s3 cp --recursive  --exclude '*'  --include '*.svg' --content-type="image/svg+xml" --metadata-directive="REPLACE" $s3_upload_bucket $s3_upload_bucket --acl public-read
 
 
 # Invalidate cloudfront cache
-echo "aws cloudfront create-invalidation --distribution-id $cloudfront_distribution_id --paths "/*" --profile $aws_profile"
-aws cloudfront create-invalidation --distribution-id $cloudfront_distribution_id --paths "/*" --profile $aws_profile
+echo "aws cloudfront create-invalidation --distribution-id $cloudfront_distribution_id --paths \"/*\""
+aws cloudfront create-invalidation --distribution-id $cloudfront_distribution_id --paths "/*"
 if [[ $? != 0 ]]; then
     error_msg "CF Cache invalidation failed!!!";
     exit 1;

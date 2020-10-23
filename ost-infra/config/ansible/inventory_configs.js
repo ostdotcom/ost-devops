@@ -419,7 +419,7 @@ AnsibleInventoryData[Constants.saasApiApp] = {
         exec_file_path: "executables/stateRootSync/auxToOrigin.js",
         extra_vars: "--cronProcessId {{identifier}}"
       },
-      timer: "*-*-* 12:00:00"
+      timer: "Mon 10:00"
     },
     cronProcessesMonitor:{
       identifier: "{{identifier}}",

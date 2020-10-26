@@ -73,10 +73,13 @@ repo_url="git@github.com:ostdotcom";
 repo_dir="";
 if [[ $st_profile == "company" ]]; then
   if [[ $APPLICATION == "web" ]]; then
+    repo_url="git@github.com:OpenST";
     repo_dir="kit-web";
   elif [[ $APPLICATION == "api" ]]; then
+    repo_url="git@github.com:OpenST";
     repo_dir="kit-api";
   elif [[ $APPLICATION == "saasApi" ]]; then
+    repo_url="git@github.com:OpenST";
     repo_dir="platform-api";
     tar_exclusions+=('package-lock.json')
   elif [[ $APPLICATION == "ostView" ]]; then

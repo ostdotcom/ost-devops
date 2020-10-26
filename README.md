@@ -1,3 +1,27 @@
+#### Local workstation setup
+
+* Set following ENV variables.
+```bash
+export OST_INFRA_AWS_ACCESS_KEY='<AWS IAM access key>'
+export OST_INFRA_AWS_KEY_SECRET='<AWS IAM key secret>'
+export OST_INFRA_AWS_REGION='eu-west-1'
+export OST_INFRA_AWS_ACCOUNT_ID=401473291306
+export OST_INFRA_AWS_KMS_KEY_ID='6033a809-44f2-47db-854b-8f6266c4f540'
+
+export OST_INFRA_MYSQL_HOST='localhost'
+export OST_INFRA_MYSQL_USER='infra_user'
+export OST_INFRA_MYSQL_PASSWORD='<DB Password>'
+export OST_INFRA_MYSQL_PORT=3308
+
+export OST_INFRA_MYSQL_CONNECTION_POOL_SIZE=5
+export OST_INFRA_WORKSPACE='<Workspace directory path>'
+```
+
+* Create SSH tunnel to connect to ost infra DB.
+```bash
+ssh -o ExitOnForwardFailure=yes -L 3308:ost-platform-analytics.czwqswfb00id.eu-west-1.rds.amazonaws.com:3306 99.80.111.137 -N -f
+```
+
 #### **Create and update platform configuration data**
 
 * Create platform configuration if not created. [p1]

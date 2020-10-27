@@ -94,8 +94,9 @@ if [[ $st_profile == "company" ]]; then
   elif [[ $APPLICATION == "ostAnalytics" ]]; then
       repo_dir="analytics";
   elif [[ $APPLICATION == "ostInfra" ]]; then
-      repo_dir="ost-devops";
-      tar_exclusions+=('package-lock.json')
+    repo_url="git@github.com:OpenST";
+    repo_dir="ost-devops";
+    tar_exclusions+=('package-lock.json')
   elif [[ $APPLICATION == "mappyApi" ]]; then
     repo_dir="demo-server";
     tar_exclusions+=('package-lock.json')

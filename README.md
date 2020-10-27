@@ -19,7 +19,7 @@ export OST_INFRA_WORKSPACE='<Workspace directory path>'
 
 * Create SSH tunnel to connect to ost infra DB.
 ```bash
-ssh -o ExitOnForwardFailure=yes -L 3308:ost-platform-analytics.czwqswfb00id.eu-west-1.rds.amazonaws.com:3306 99.80.111.137 -N -f
+ssh -o ExitOnForwardFailure=yes -L 3308:<MySQL Host>:3306 99.80.111.137 -N -f
 ```
 
 #### **Create and update platform configuration data**

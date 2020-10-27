@@ -6,7 +6,7 @@ export OST_INFRA_AWS_ACCESS_KEY='<AWS IAM access key>'
 export OST_INFRA_AWS_KEY_SECRET='<AWS IAM key secret>'
 export OST_INFRA_AWS_REGION='eu-west-1'
 export OST_INFRA_AWS_ACCOUNT_ID=401473291306
-export OST_INFRA_AWS_KMS_KEY_ID='6033a809-44f2-47db-854b-8f6266c4f540'
+export OST_INFRA_AWS_KMS_KEY_ID='<AWS KMS key id>'
 
 export OST_INFRA_MYSQL_HOST='localhost'
 export OST_INFRA_MYSQL_USER='infra_user'

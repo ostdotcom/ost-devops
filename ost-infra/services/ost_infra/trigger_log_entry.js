@@ -66,8 +66,7 @@ const servicePrototype = {
     let ipAddress = hostname_arr[5]
       , remoteApp = hostname_arr[3]
       , envId = `${hostname_arr[0]}-${hostname_arr[1]}-${hostname_arr[2]}`
-      , severity = oThis.getSeverityForEvent(formattedArgs)
-      , kind = formattedArgs['SERVICECHECKCOMMAND']
+      , {severity, kind} = oThis.getSeverityForEvent(formattedArgs)
     ;
 
     if(!severity){
@@ -143,21 +142,26 @@ const servicePrototype = {
     let lastServiceOKDiff = (currentTS - data['LASTSERVICEOK']);
 
     let severity = null;
+    let kind = null;
     let message = null;
     if(data['HOSTSTATE'] === 'DOWN' && data['LASTHOSTSTATE'] === 'DOWN' && !data['SERVICEDISPLAYNAME']  ){
       // System is down
       severity = 'high';
+      kind = 'server_down';
       message = `Host (${data['HOSTNAME']}) is at state - ${data['HOSTSTATE']} and is not reachable over ICMP from nagios server`;
     } else if(data['SERVICESTATE'] !== 'OK' && data['SERVICESTATETYPE'] === 'HARD' && data['HOSTSTATE'] !== 'DOWN'){
       // Service state is not OK
       severity = 'high';
+      kind = data['SERVICECHECKCOMMAND'];
       message = `Service ${data['SERVICESTATE']} for ${data['SERVICEDISPLAYNAME']} on ${data['HOSTNAME']}. The Command executed => ${data['SERVICECHECKCOMMAND']}. No of attempts => ${data['SERVICEATTEMPT']}`;
     } else if(data['SERVICESTATE'] === 'OK' && data['SERVICESTATETYPE'] === 'HARD' && lastServiceOKDiff > 250 && data['HOSTSTATE'] !== 'DOWN'){
       // Recovery of of an earlier alert
       severity = 'low';
+      kind = data['SERVICECHECKCOMMAND'];
       message = `Recovery of service ${data['SERVICEDISPLAYNAME']} on ${data['HOSTNAME']}. The Command executed => ${data['SERVICECHECKCOMMAND']} - No of attempts => ${data['SERVICEATTEMPT']}`;
     } else if(data['SERVICESTATE'] === 'UNKNOWN'  && data['HOSTSTATE'] !== 'DOWN') {
       severity = 'medium';
+      kind = data['SERVICECHECKCOMMAND'];
       message = `${data['SERVICESTATE']} state in service ${data['SERVICEDISPLAYNAME']} on ${data['HOSTNAME']}`;
     }
 
@@ -175,7 +179,7 @@ const servicePrototype = {
     //   severity = 'high';
     // }
 
-    return severity;
+    return {severity, kind};
   }
 
 };

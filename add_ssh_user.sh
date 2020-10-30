@@ -48,10 +48,10 @@ stack_users="${ENV}-${SUB_ENV}-${APP_STACK}"
 
 case ${stack_users} in
     "production-sandbox-ost")
-        export final_users=("alpesh" "aman" "anagha" "dhananjay" "kedar" "pankaj" "shlok" "somashekhar" "sunil");
+        export final_users=("alpesh" "aman" "anagha" "dhananjay" "kedar" "pankaj" "shlok" "somashekhar" "sunil" "ben" "ryan");
         ;;
     "production-main-ost")
-        export final_users=("alpesh" "aman" "kedar" "pankaj" "somashekhar" "sunil");
+        export final_users=("alpesh" "aman" "kedar" "pankaj" "somashekhar" "sunil" "ben" "ryan");
         ;;
     *)
         echo "Invalid stack combination for final_users!"
@@ -159,6 +159,11 @@ ssh_users["somashekhar"]="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDP+3PP0rpst5LYhC
 ssh_users["pankaj"]="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDaWHss/kw8dslviBvcVxTsToyYtIhglnHE/cN6aoMbfz+gyDwHZ5EUOQjEgrr0SuORAFTsUqIInyRjI25WbfvAqlayPuSbKH4hkmUO8TBtv6RfXvmAzJbpaBMtOykniCXoKVH8N+ZAG2nP+umm5jlgK6aaYI9XPSTJkEpci3ATzZepYokFuScajf7UbiS7RsK5jhdqyhufWZqFmZcF4NMRfm5U4k6AIb0dnqMSeDz3YFSDJomcd1VNh5lT+HXeSmSL5qzoEbWE2O9YX4gfRTJPwnVFSh9SO7G+wUxJM5LNtzGtdABTk4nFii9WCBrDh7BA9NmxqacuIi/2SvDCVUzf pankaj@Pankajs-MacBook-Pro.local";
 
 ssh_users["shlok"]="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCe7RwOxMxscv/Cpdyrshy6vfmCKBXlZCf1mZ1WRlgV2dCFPkQZvrG8mM+U67bS3xvdEFaTB5vKhCNWaOqcVPZnzgMod7HqqBYggio+FYIZJinz4MxYL+IKGy7UGWgm3x0p+xsaLBfjkAxPKmpE75F5MdhVJmNWyaQRxXiKtXIc/afh14ixPyuz/8syh74pqKeav9Bq2rIJ82GDrXb+TUg3u50ADXBjI2BRBvmAHAtmNl1Mr2q/pDISWw3a6vTEzFimR1bL6BEiRCH+nQMTfnxOcPoN39GkREHMROBF2haJGTQJ167KAZyKZpUg5vajjCRgvcAEt2F/s+N7CAUO7oXgtXISgNoITOrOU8GGRsBO005lZBKaayCcqzMAYyqjJf3eE6MD3MWCOegF9tmqoPmtiVbq8lRc/IBxvbVuGp4UNRxJ8iIcZgjF09LfHzbNlHM4+GPbJvWEuJo4CnhqQ7CQT5ZlqNvcT9tATzTMrbaCWgEAiEWOjzH2Rg8V2OBirEqhX5Wg5xE+koKnfwfdiwxfEwHlurTxxdHcrBITdEMLvbNXtiJ3Ndq8QYDEwKt0bAQtwqhkL8641JQnJNG3qEeHW4C3ra5xS1FygbqphCt02g3FATmDyz1sXE2LJ94VuzMsKuu2zbpvHU28Lu8+LbqLtYyp8ba+dqrRIg6HDoIZQQ== shlok@ost.com";
+
+
+ssh_users["ben"]="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCuLE9eI6/Zl+XPQsZMgOvn0q8Qmv/Mxjx402RKusbN1PBcVsI3jFDmdjJn0VfwkOavHjYtyrDn7zF3FIChKHTb75ppLEbDw4QSM0vcaDgLC3XR9vNYNXlNpkomG0bbW4Bl77UH0L/W5uDNHHYsliEmkYeJNAqwteY29goAZRNPKVXRZxQzyGExpdKsDChdrd+fKgmjGcLD1en5UJsrb+2jAdPNJlltUvS+3W0U84yLy1VAlakjp/Kgii+F0PhE0VnFVmAomnh/Ym/JYvTJo0KhQyToghpjVJSrwyA7E/4TPj2I9S+8BAhkwqi+V75Tj0WjrwzRA4Gg8mH4bg5OhMoBAxBcx+NrvwuEOluWydZ1/WbnNyzMDhRR2BYS7n20da1nJso5RgiajpA22Zzqe5B+BUhoaOqOXkxO4AdgR5zebeyGW6LvA3ALFSnJzfzVqXnMEmSwWewRL6k9k0OKotGPnpPwN2hGraxVYQh3U0VgTY7RfYEJ0G90M7gIqmiDHjTCfORFNw329Ejd/6jebnzinNJD0bZcLvv0aHhgFdB/PDivMR5Y0vxJonL6pObCmsFA/qEnFDS9GDuDCoRZsGfbfId+oHnvUvCaW0TSAqBQ3tR1tXsBNA2+OArBfgQCgx6OU/mRr6wUY4mwbXn8JYkIB0T2rH1qGpgff0esKSDOEw== ben@mosaiclabs.eu";
+
+ssh_users["ryan"]="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDqLsEVlCP/3HPJQJaRuWRC8hXu+s0el+HpEXkdEmVb6HwmfPREs0KIGgWRoeFV4eceoYOeALcJmQKVbZB0LXIYgH9IwQqxxQxZ5cQlX9GjX1h1iBpePJ0bLQBQmClw/gdjWr2MVpttIgIVpwzxCEzGEJPWx/mYgo3CLbKwiglG1+/Kc589YLnhpQi2CPk8KZ6Zv5GzQM9SYyJMBxpz3HgT8EahaQ+/O9U9ihXkrtcasJpw91YNnMog92OrSW4iK39lS8sZbkH5ntZO1F7POGzmwBVB4luIydj259B3Bos3PewDqM0M9DS6bH85krLVJ0Is3PUSdpfY0IsaZ6NqgfucO7pmAinOiTA4H2jFfkgYhj/yaSEp+pIkiXlVUmZtFvjHb2YrDFxl/xecgvcYAQFdU9Bc1KLINNUnEFDLwy5llr1JDwFx3KLZAzutQf2OXkJ6O3zR4QxMDT4hoDAK82sf9oUtEXx5LrBKP7pdgZ+3d7MCRdvIHNjSIiZfYx8eENFmKSrNhk7l4JkKizFYhupUheZ935ENRJLib6DtzY+/YhCk3LtJLDbS5vhkFGsiV8YGy6jV2ziGem/DS3rxqcwWn028+YwggCKofgNp6N26GmTIpkdNl7ytPFMtGa44YqPCOH6dRis3AZ9C/n574HTj8LCiAQbfhtXuGpiXPPDcJw== ryanbubinski@mbpro15-ryanb.local";
 
 #echo "All keys => ${!ssh_users[@]}"
 

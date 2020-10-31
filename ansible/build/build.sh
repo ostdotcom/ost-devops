@@ -118,9 +118,12 @@ fi
 echo "";
 echo "$seperator_line Checkout git branch [START] $seperator_line";
 workspace=$OST_INFRA_WORKSPACE;
-#cd $workspace;
+
 echo "workspace: $workspace";
+echo "repo_url: $repo_url";
 echo "repo_dir: $repo_dir";
+echo "BRANCH_NAME: $BRANCH_NAME";
+
 builds_path=$workspace/rpm_builds;
 mkdir -p $builds_path;
 cd $builds_path;

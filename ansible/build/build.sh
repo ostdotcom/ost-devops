@@ -141,13 +141,11 @@ if [[ ! -d $repo_dir ]]; then
 fi
 cd $repo_full_path ;
 git stash ;
+
+# update remote origin url in case it changed
+git remote set-url $GITHUB_REPO origin ;
+
 git pull --rebase ;
-
-echo "branch_name: $BRANCH_NAME";
-echo "github repo: $GITHUB_REPO";
-echo `git remote -v`;
-echo `git checkout $BRANCH_NAME`;
-
 git checkout $BRANCH_NAME ;
 if [[ $? != 0 ]]; then
     error_msg "Invalid branch!!!";

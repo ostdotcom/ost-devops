@@ -142,7 +142,12 @@ fi
 cd $repo_full_path ;
 git stash ;
 git pull --rebase ;
-git fetch ;
+
+echo "branch_name: $BRANCH_NAME";
+echo "github repo: $GITHUB_REPO";
+echo `git remote -v`;
+echo `git checkout $BRANCH_NAME`;
+
 git checkout $BRANCH_NAME ;
 if [[ $? != 0 ]]; then
     error_msg "Invalid branch!!!";

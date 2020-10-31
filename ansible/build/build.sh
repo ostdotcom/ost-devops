@@ -69,7 +69,8 @@ s3_builds_path=$S3_BUILDS_PATH;
 
 seperator_line="~~~~~~~~~~~~";
 
-repo_url="git@github.com:ostdotcom";
+# repo_url="git@github.com:ostdotcom";
+repo_url="git@github.com:OpenST";
 repo_dir="";
 if [[ $st_profile == "company" ]]; then
   if [[ $APPLICATION == "web" ]]; then

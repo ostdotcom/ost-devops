@@ -143,7 +143,7 @@ cd $repo_full_path ;
 git stash ;
 
 # update remote origin url in case it changed
-git remote set-url $GITHUB_REPO origin ;
+git remote set-url origin $GITHUB_REPO ;
 
 git pull --rebase ;
 git checkout $BRANCH_NAME ;

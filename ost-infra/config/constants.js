@@ -417,9 +417,9 @@ AppConstants.prototype = {
 
   ec2DefaultInstanceType: function (env, subEnv) {
     if(env === 'production' && subEnv === 'main'){
-      return 't2.xlarge';
+      return 't3a.xlarge';
     } else {
-      return 't2.micro';
+      return 't3a.micro';
     }
   },
 

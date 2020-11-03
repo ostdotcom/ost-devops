@@ -106,7 +106,7 @@ DataFileKlass.prototype = {
 
     fileType = fileType || 'json';
     let _file = oThis.getFileFullPath(fileName, fileType);
-    let resp = shell.exec(`subl ${_file}`);
+    let resp = shell.exec(`open ${_file}`);
 
     // If Error in executing command
     if(resp.code != 0){

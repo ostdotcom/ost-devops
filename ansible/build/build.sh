@@ -69,12 +69,15 @@ s3_builds_path=$S3_BUILDS_PATH;
 
 seperator_line="~~~~~~~~~~~~";
 
-repo_url="git@github.com:ostdotcom";
+# repo_url="git@github.com:ostdotcom";
+repo_url="git@github.com:OpenST";
 repo_dir="";
 if [[ $st_profile == "company" ]]; then
   if [[ $APPLICATION == "web" ]]; then
+    repo_url="git@github.com:OpenST";
     repo_dir="kit-web";
   elif [[ $APPLICATION == "api" ]]; then
+    repo_url="git@github.com:OpenST";
     repo_dir="kit-api";
   elif [[ $APPLICATION == "saasApi" ]]; then
     repo_dir="platform-api";
@@ -91,8 +94,9 @@ if [[ $st_profile == "company" ]]; then
   elif [[ $APPLICATION == "ostAnalytics" ]]; then
       repo_dir="analytics";
   elif [[ $APPLICATION == "ostInfra" ]]; then
-      repo_dir="ost-devops";
-      tar_exclusions+=('package-lock.json')
+    repo_url="git@github.com:OpenST";
+    repo_dir="ost-devops";
+    tar_exclusions+=('package-lock.json')
   elif [[ $APPLICATION == "mappyApi" ]]; then
     repo_dir="demo-server";
     tar_exclusions+=('package-lock.json')
@@ -114,9 +118,12 @@ fi
 echo "";
 echo "$seperator_line Checkout git branch [START] $seperator_line";
 workspace=$OST_INFRA_WORKSPACE;
-#cd $workspace;
+
 echo "workspace: $workspace";
+echo "repo_url: $repo_url";
 echo "repo_dir: $repo_dir";
+echo "BRANCH_NAME: $BRANCH_NAME";
+
 builds_path=$workspace/rpm_builds;
 mkdir -p $builds_path;
 cd $builds_path;
@@ -133,6 +140,10 @@ if [[ ! -d $repo_dir ]]; then
 fi
 cd $repo_full_path ;
 git stash ;
+
+# update remote origin url in case it changed
+git remote set-url origin $GITHUB_REPO ;
+
 git pull --rebase ;
 git checkout $BRANCH_NAME ;
 if [[ $? != 0 ]]; then

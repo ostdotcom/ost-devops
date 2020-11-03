@@ -80,6 +80,7 @@ if [[ $st_profile == "company" ]]; then
     repo_url="git@github.com:OpenST";
     repo_dir="kit-api";
   elif [[ $APPLICATION == "saasApi" ]]; then
+    repo_url="git@github.com:OpenST";
     repo_dir="platform-api";
     tar_exclusions+=('package-lock.json')
   elif [[ $APPLICATION == "ostView" ]]; then

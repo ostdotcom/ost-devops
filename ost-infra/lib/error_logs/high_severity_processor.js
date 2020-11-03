@@ -123,6 +123,10 @@ class HighSeverityProcessor {
   async _createPagerDutyTicket(errorEntry) {
     const oThis = this;
 
+    if(oThis.pagerDutyVars.highSeverityApiKey === '' || (oThis.infraAlert && oThis.pagerDutyVars.highSeverityInfraApiKey === '')){
+      return false;
+    }
+
     const incidentKey = `INCIDENT FOR ${errorEntry.remoteApp} ${errorEntry.env_id} has occurred on ${
         errorEntry.machine_ip
       }. at ${oThis.currentTime} Error is: ${errorEntry.kind}`,

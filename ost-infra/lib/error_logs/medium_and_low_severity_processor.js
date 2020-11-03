@@ -171,6 +171,10 @@ class MediumAndLowSeverityProcessor {
   async _createPagerDutyTicket(aggregatedEntry) {
     const oThis = this;
 
+    if(oThis.pagerDutyVars.mediumSeverityApiKey === '' || (oThis.infraAlert && oThis.pagerDutyVars.mediumSeverityInfraApiKey === '')){
+      return false;
+    }
+
     const incidentKey = `INCIDENT FOR ${aggregatedEntry.remoteApp} ${aggregatedEntry.env_id} ${
         aggregatedEntry.kind
       } has occurred ${aggregatedEntry.count} times at ${new Date()}.`,

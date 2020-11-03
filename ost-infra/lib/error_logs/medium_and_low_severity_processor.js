@@ -90,7 +90,10 @@ class MediumAndLowSeverityProcessor {
 
       // Call pager duty only for medium severity errors.
       if (oThis.severity === ErrorLogsConstants.mediumSeverity) {
-        pagerDutyPromisesArray.push(oThis._createPagerDutyTicket(aggregatedEntry));
+
+        if(oThis.pagerDutyVars.mediumSeverityApiKey !== '' || (oThis.infraAlert && oThis.pagerDutyVars.mediumSeverityInfraApiKey !== '')){
+          pagerDutyPromisesArray.push(oThis._createPagerDutyTicket(aggregatedEntry));
+        }
       }
 
       emailPromisesArray.push(
@@ -112,7 +115,7 @@ class MediumAndLowSeverityProcessor {
       );
     }
 
-    if (oThis.severity === ErrorLogsConstants.mediumSeverity) {
+    if (oThis.severity === ErrorLogsConstants.mediumSeverity && pagerDutyPromisesArray.length > 0) {
       let pagerDutyResp = await Promise.all(pagerDutyPromisesArray);
       for (let i = 0; i < pagerDutyResp.length; i++) {
         let resp = pagerDutyResp[i];
@@ -170,10 +173,6 @@ class MediumAndLowSeverityProcessor {
    */
   async _createPagerDutyTicket(aggregatedEntry) {
     const oThis = this;
-
-    if(oThis.pagerDutyVars.mediumSeverityApiKey === '' || (oThis.infraAlert && oThis.pagerDutyVars.mediumSeverityInfraApiKey === '')){
-      return false;
-    }
 
     const incidentKey = `INCIDENT FOR ${aggregatedEntry.remoteApp} ${aggregatedEntry.env_id} ${
         aggregatedEntry.kind
